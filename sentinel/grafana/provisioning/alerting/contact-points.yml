@@ -1,0 +1,9 @@
+apiVersion: 1
+contactPoints:
+  - orgId: 1
+    name: "collect-verything"
+    receivers:
+      - uid: "collect-verything"
+        type: "email"
+        settings:
+          addresses: "collectverythings@gmail.com"
