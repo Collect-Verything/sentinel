@@ -1,0 +1,1 @@
+detailler ici la source de product et egalement l'ecoute a sois meme donc sentinel qui inspect sentinel
