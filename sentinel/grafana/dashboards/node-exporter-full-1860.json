@@ -15877,72 +15877,32 @@
   ],
   "templating": {
     "list": [
-
       {
-        "current": {},
-        "datasource": {
-          "type": "Prometheus"
-        },
-        "definition": "",
-        "includeAll": false,
-        "label": "Job",
+        "type": "query",
         "name": "job",
-        "options": [],
-        "query": {
-          "query": "label_values(node_uname_info, job)",
-          "refId": "Prometheus-job-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
+        "label": "Job",
+        "datasource": "Prometheus",
+        "query": "label_values(node_uname_info, job)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": false,
+        "current": { "selected": true, "text": "All", "value": "$__all" }
       },
       {
-        "current": {},
-        "datasource": {
-          "type": "Prometheus"
-        },
-        "definition": "label_values(node_uname_info{job=\"$job\"}, nodename)",
-        "includeAll": false,
-        "label": "Nodename",
-        "name": "nodename",
-        "options": [],
-        "query": {
-          "query": "label_values(node_uname_info{job=\"$job\"}, nodename)",
-          "refId": "Prometheus-nodename-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "Prometheus"
-        },
-        "definition": "label_values(node_uname_info{job=\"$job\", nodename=\"$nodename\"}, instance)",
-        "includeAll": false,
-        "label": "Instance",
+        "type": "query",
         "name": "node",
-        "options": [],
-        "query": {
-          "query": "label_values(node_uname_info{job=\"$job\", nodename=\"$nodename\"}, instance)",
-          "refId": "Prometheus-node-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
+        "label": "Instance",
+        "datasource": "Prometheus",
+        "query": "label_values(node_uname_info{job=\"$job\"}, instance)",
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false
       },
       {
-        "current": {
-          "text": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+",
-          "value": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+"
-        },
-        "hide": 2,
-        "includeAll": false,
+        "type": "custom",
         "name": "diskdevices",
+        "hide": 2,
+        "query": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+",
         "options": [
           {
             "selected": true,
@@ -15950,8 +15910,10 @@
             "value": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+"
           }
         ],
-        "query": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+",
-        "type": "custom"
+        "current": {
+          "text": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+",
+          "value": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+"
+        }
       }
     ]
   },
