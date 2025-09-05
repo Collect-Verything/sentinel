@@ -5,7 +5,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "grafana",
-          "uid": "-- Grafana --"
+          "uid": "product-logs-v1"
         },
         "enable": true,
         "hide": true,
@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -47,7 +47,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 1,
+      "id": null,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -69,7 +69,7 @@
       "targets": [
         {
           "refId": "A",
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "queryType": "range",
           "expr": "count_over_time({job=\"nginx\"}[1m])"
         }
@@ -103,7 +103,7 @@
         "x": 6,
         "y": 0
       },
-      "id": 2,
+      "id": null,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -124,7 +124,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "count_over_time({job=\"nginx\"} |= \" 500 \"[5m])",
           "queryType": "range",
           "refId": "A"
@@ -159,7 +159,7 @@
         "x": 12,
         "y": 0
       },
-      "id": 3,
+      "id": null,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -180,7 +180,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "count_over_time({job=\"nginx\"} |= \" 404 \"[5m])",
           "queryType": "range",
           "refId": "A"
@@ -251,7 +251,7 @@
         "x": 0,
         "y": 4
       },
-      "id": 4,
+      "id": null,
       "options": {
         "legend": {
           "calcs": [],
@@ -268,7 +268,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "sum by (status)(count_over_time({job=\"nginx\"} | regexp \"HTTP/\\\\S+\\\" (?P<status>\\\\d{3}) \" | label_format status=\"{{.status}}\" [$__interval]))",
           "legendFormat": "{{status}}",
           "queryType": "range",
@@ -311,7 +311,7 @@
         "x": 12,
         "y": 4
       },
-      "id": 5,
+      "id": null,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -327,7 +327,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "topk(5, sum by (uri) (count_over_time({job=\"nginx\"} | regexp \"\\\"(?:GET|POST|PUT|DELETE|PATCH|HEAD) (?P<uri>\\\\S+)\" | label_format uri=\"{{.uri}}\" [5m])))",
           "queryType": "range",
           "refId": "A"
@@ -374,7 +374,7 @@
         "x": 0,
         "y": 10
       },
-      "id": 6,
+      "id": null,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -390,7 +390,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "topk(5, sum by (client) (count_over_time({job=\"nginx\"} | regexp \"^(?P<client>\\\\S+) \" | label_format client=\"{{.client}}\" [5m])))",
           "queryType": "range",
           "refId": "A"
@@ -415,7 +415,7 @@
         "x": 12,
         "y": 10
       },
-      "id": 7,
+      "id": null,
       "options": {
         "dedupStrategy": "none",
         "enableInfiniteScrolling": false,
@@ -430,7 +430,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "{job=\"nginx\"}",
           "refId": "A"
         }
@@ -449,7 +449,7 @@
         "x": 0,
         "y": 16
       },
-      "id": 8,
+      "id": null,
       "options": {
         "dedupStrategy": "signature",
         "enableInfiniteScrolling": false,
@@ -464,7 +464,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "{job=\"system\"} |= \"Failed password\"",
           "refId": "A"
         }
@@ -483,7 +483,7 @@
         "x": 12,
         "y": 18
       },
-      "id": 9,
+      "id": null,
       "options": {
         "dedupStrategy": "none",
         "enableInfiniteScrolling": false,
@@ -498,7 +498,7 @@
       "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": "${DS_LOKI}",
+          "datasource": "Loki",
           "expr": "{job=\"system\"} |= \" error \"",
           "refId": "A"
         }
@@ -526,6 +526,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "Logs – Nginx & System (Loki)",
-  "uid": "logs-nginx-system-v3",
+  "uid": "product-logs-v1",
   "version": 1
 }
