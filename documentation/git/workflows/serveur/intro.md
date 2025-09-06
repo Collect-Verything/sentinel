@@ -1,4 +1,3 @@
-
 ## Roadmap CI/CD Sentinel
 
 1. **Connexion SSH**
