@@ -2,6 +2,7 @@
 
 1. **Connexion SSH**
 
+    * Le serveur se met à jour via une action workflow uniquement lorsque le répertoire sentinel du repo a été modifié.
     * Configurer l’accès via **clé SSH** (sécurisé et automatique).
     * Prévoir un fallback *manuel* avec mot de passe seulement en cas d’urgence (non recommandé).
 
@@ -25,6 +26,7 @@
     * Copier le contenu du répertoire `sentinel/` (compose.yaml, configs Grafana, Prometheus, Loki, Fluent Bit…)
       → dans `/root/sentinel` (ou un autre dossier cible sur le serveur).
     * Utiliser `rsync` ou `scp` pour la copie depuis GitHub Actions.
+    * Le serveur se mets a jour avec une action worklfow uniquement quand le repertoire sentinel du repo a etait modifié
 
 6. **Redémarrage de la stack**
 
