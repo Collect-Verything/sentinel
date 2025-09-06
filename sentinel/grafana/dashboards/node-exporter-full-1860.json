@@ -15874,19 +15874,18 @@
   "schemaVersion": 41,
   "tags": [
     "Prometheus"
-  ],
   "templating": {
-    "list": [
-      {
+  "list": [
+  {
         "type": "query",
         "name": "job",
         "label": "Job",
         "datasource": "Prometheus",
         "query": "label_values(node_uname_info, job)",
-        "refresh": 2,
-        "includeAll": true,
+        "refresh": 1,
+        "includeAll": false,
         "multi": false,
-        "current": { "selected": true, "text": "All", "value": "$__all" }
+        "sort": 1
       },
       {
         "type": "query",
@@ -15894,9 +15893,10 @@
         "label": "Instance",
         "datasource": "Prometheus",
         "query": "label_values(node_uname_info{job=\"$job\"}, instance)",
-        "refresh": 2,
+        "refresh": 1,
         "includeAll": false,
-        "multi": false
+        "multi": false,
+        "sort": 1
       },
       {
         "type": "custom",
@@ -15915,9 +15915,9 @@
           "value": "[a-z]+|nvme[0-9]+n[0-9]+|mmcblk[0-9]+"
         }
       }
-    ]
+  ]
   },
-  "time": {
+    "time": {
     "from": "now-24h",
     "to": "now"
   },
