@@ -87,46 +87,43 @@ jobs:
             -e "ssh -p 22 -o StrictHostKeyChecking=no" \
             sentinel/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/sentinel/
 
-#
-#
-#
-#      # 🚀 Déploiement depuis /root/sentinel
-#      - name: Compose deploy
-#        uses: appleboy/ssh-action@v1.0.0
-#        with:
-#          host: ${{ vars.SSH_HOST }}
-#          username: ${{ vars.SSH_USER }}
-#          password: ${{ secrets.SSH_PASSWORD }}
-#          port: 22
-#          script: |
-#            set -euo pipefail
-#            cd /root/sentinel
-#
-#            echo "==> Validation de la config"
-#            docker compose config >/dev/null
-#
-#            echo "==> Pull des images (si :latest)"
-#            docker compose pull || true
-#
-#            echo "==> Down ancienne stack"
-#            docker compose down --remove-orphans || true
-#
-#            echo "==> Up nouvelle stack"
-#            docker compose up -d
-#
-#            echo "==> Etat"
-#            docker compose ps
-#
-#      # ✅ Sanity checks rapides
-#      - name: Health checks
-#        uses: appleboy/ssh-action@v1.0.0
-#        with:
-#          host: ${{ vars.SSH_HOST }}
-#          username: ${{ vars.SSH_USER }}
-#          password: ${{ secrets.SSH_PASSWORD }}
-#          port: 22
-#          script: |
-#            set -e
-#            echo "Prometheus:" && curl -sf http://localhost:9090/-/ready && echo " OK"
-#            echo "Loki:"       && curl -sf http://localhost:3100/ready   && echo " OK"
-#            echo "Grafana:"    && curl -sf http://localhost:3000/login   && echo " OK"
+      # 🚀 Déploiement depuis /root/sentinel
+      - name: Compose deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -euo pipefail
+            cd /root/sentinel
+
+            echo "==> Validation de la config"
+            docker compose config >/dev/null
+
+            echo "==> Pull des images (si :latest)"
+            docker compose pull || true
+
+            echo "==> Down ancienne stack"
+            docker compose down --remove-orphans || true
+
+            echo "==> Up nouvelle stack"
+            docker compose up -d
+
+            echo "==> Etat"
+            docker compose ps
+
+      # ✅ Sanity checks rapides
+      - name: Health checks
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            echo "Prometheus:" && curl -sf http://localhost:9090/-/ready && echo " OK"
+            echo "Loki:"       && curl -sf http://localhost:3100/ready   && echo " OK"
+            echo "Grafana:"    && curl -sf http://localhost:3000/login   && echo " OK"
