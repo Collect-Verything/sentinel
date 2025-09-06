@@ -1,11 +1,21 @@
 name: SSH smoke test
 
 on:
-  workflow_dispatch: {}   # !!!!!! exécution manuelle depuis onglet Actions, trouver un moyen de delcancher cette action uniquement quand le repertoir sentinel est modifié
+  workflow_dispatch: {}                  # manuel
+  push:                                  # auto -> dossier ciblé change
+    branches: [ main ]
+    paths:
+      - 'sentinel/**'
+      - '.github/workflows/ssh-smoke.yml'
+
+concurrency:
+  group: ssh-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ssh-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Setup SSH agent with repo secret
         uses: webfactory/ssh-agent@v0.9.0
@@ -15,9 +25,12 @@ jobs:
       - name: Trust remote host key
         run: ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Run simple remote command
+      - name: Run remote command
+        env:
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ vars.SSH_USER }}
+          SSH_PORT: ${{ vars.SSH_PORT || '22' }} # si upgrade secu plus tard
         run: |
-          ssh \
-            -o StrictHostKeyChecking=yes \
-            ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} \
+          ssh -p "$SSH_PORT" -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
             'echo "Host: $(hostname)"; echo "User: $(whoami)"; echo "PWD: $(pwd)"; ls -la'
