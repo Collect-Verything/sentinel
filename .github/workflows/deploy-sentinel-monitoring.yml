@@ -1,4 +1,4 @@
-name: SSH smoke test
+name: Deploy Sentinel Monitoring
 
 on:
   workflow_dispatch: {}                  # manuel
@@ -6,14 +6,14 @@ on:
     branches: [ main ]
     paths:
       - 'sentinel/**'
-      - '.github/workflows/ssh-smoke.yml'
+      - '.github/workflows/deploy-sentinel-monitoring.yml'
 
 concurrency:
-  group: ssh-smoke-${{ github.ref }}
+  group: deploy-sentinel-monitoring-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ssh-smoke:
+  deploy-sentinel-monitoring:
     runs-on: ubuntu-latest
     steps:
       - name: Bootstrap server (idempotent)
