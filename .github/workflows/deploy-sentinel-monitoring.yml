@@ -1,8 +1,8 @@
 name: Deploy Sentinel Monitoring
 
 on:
-  workflow_dispatch: {}                  # manuel
-  push:                                  # auto -> dossier ciblé change
+  workflow_dispatch: {}
+  push:
     branches: [ main ]
     paths:
       - 'sentinel/**'
@@ -16,6 +16,7 @@ jobs:
   deploy-sentinel-monitoring:
     runs-on: ubuntu-latest
     steps:
+      # 🪚 Verify directory if exist
       - name: Bootstrap server (idempotent)
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -53,9 +54,11 @@ jobs:
               echo "==> Done."
 
 
+      # ⚒️ Install
       - name: Install sshpass on runner (for rsync over password SSH)
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      # 🕵 Verify directory if exist
       - name: Ensure target dir exists
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -67,15 +70,9 @@ jobs:
             set -e
             mkdir -p /root/sentinel
 
+      # 🏠 Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Debug – liste les fichiers
-        run: |
-          pwd
-          ls -la
-          echo "---- sentinel/ ----"
-          ls -la sentinel || true
 
       # 🔁 Sync complet (ajouts/modifs/suppressions) du dossier sentinel/ vers /root/sentinel/
       - name: Rsync repo/sentinel -> server:/root/sentinel (with delete)
