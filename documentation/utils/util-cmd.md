@@ -1,8 +1,6 @@
-Docker cleaning
+# Docker cleaning
 
 ```shell
-
-
 # Liste rapide des noms
 docker ps --format '{{.Names}}'
 
@@ -30,5 +28,22 @@ docker network rm sentinel_default 2>/dev/null || true
 # 4) (optionnel) supprimer les volumes nommés “sentinel_*”
 docker volume ls --format '{{.Name}}' | grep '^sentinel_' | xargs -r docker volume rm
 ```
+
+# Recuperation du dossier sentinel sur le serveur 
+
+Je rapatrie la configuration fonctionnelle actuellement en place sur le serveur vers mon projet local afin de la versionner dans Git, avec pour objectif de pouvoir ensuite la redéployer automatiquement via une pipeline CI/CD.
+
+```bash
+scp -r root@82.165.92.40:/root/sentinel ./sentinel
+```
+
+### Explications :
+
+* `scp` = copie sécurisée via SSH
+* `-r` = copie récursive (tout le dossier et sous-dossiers)
+* `root@82.165.92.40` = utilisateur + IP de ton serveur
+* `/root/sentinel` = chemin complet sur le serveur
+* `./sentinel` = répertoire de destination en local (dans ton projet)
+
 
 
