@@ -7,7 +7,7 @@ groups:
     rules:
       - uid: "nginx-20req-10s"
         title: "Pormanov Ddos"
-        condition: C
+        condition: B
         data:
           - refId: A
             datasourceUid: loki
