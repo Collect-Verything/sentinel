@@ -15874,6 +15874,7 @@
   "schemaVersion": 41,
   "tags": [
     "Prometheus"
+  ],
   "templating": {
   "list": [
   {
