@@ -16,19 +16,6 @@ jobs:
   ssh-smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Run command on remote with password
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ vars.SSH_HOST }}
-          username: ${{ vars.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          script: |
-            echo "Connected!"
-            hostname
-            whoami
-            ls -la
-
       - name: Bootstrap server (idempotent)
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -85,46 +72,7 @@ jobs:
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
+          test -d sentinel || { echo "Le dossier 'sentinel/' n'existe pas dans le repo"; exit 1; }
           sshpass -e rsync -az --delete \
             -e "ssh -p 22 -o StrictHostKeyChecking=no" \
             sentinel/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/sentinel/
-
-          # 🚀 Déploiement (down + up) depuis /root/sentinel
-          - name: Compose deploy
-            uses: appleboy/ssh-action@v1.0.0
-            with:
-              host: ${{ vars.SSH_HOST }}
-              username: ${{ vars.SSH_USER }}
-              password: ${{ secrets.SSH_PASSWORD }}
-              port: 22
-              script: |
-                set -euo pipefail
-                cd /root/sentinel
-                echo "==> docker compose config (validation)"
-                docker compose config >/dev/null
-    
-                echo "==> Pull images (si tag :latest)"
-                docker compose pull || true
-    
-                echo "==> Down old stack"
-                docker compose down --remove-orphans || true
-    
-                echo "==> Up new stack"
-                docker compose up -d
-    
-                echo "==> ps"
-                docker compose ps
-    
-          # ✅ Sanity checks rapides
-          - name: Health checks
-            uses: appleboy/ssh-action@v1.0.0
-            with:
-              host: ${{ vars.SSH_HOST }}
-              username: ${{ vars.SSH_USER }}
-              password: ${{ secrets.SSH_PASSWORD }}
-              port: 22
-              script: |
-                set -e
-                echo "Prometheus:" && curl -sf http://localhost:9090/-/ready && echo " OK"
-                echo "Loki:"       && curl -sf http://localhost:3100/ready   && echo " OK"
-                echo "Grafana:"    && curl -sf http://localhost:3000/login   && echo " OK"
