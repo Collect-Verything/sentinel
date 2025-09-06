@@ -47,3 +47,8 @@ scp -r root@82.165.92.40:/root/sentinel ./sentinel
 
 
 
+Valider le JSON avant import :
+```shell
+jq . node-exporter-full-1860.json >/dev/null
+# (si ça ne répond rien, c’est valide ; sinon jq indiquera la ligne en erreur)
+```
