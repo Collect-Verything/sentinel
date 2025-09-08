@@ -1,11 +1,11 @@
 import {Outlet} from "react-router";
+import {MainAppBar} from "../app-bar";
 
 export const MainLayout = () => {
     return (
         <>
-            <p>dessus</p>
+            <MainAppBar/>
             <Outlet/>
-            <p>dessous</p>
         </>
     )
 }

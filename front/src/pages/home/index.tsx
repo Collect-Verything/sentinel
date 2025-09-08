@@ -1,34 +1,42 @@
-import { useState } from 'react'
-import reactLogo from '../../assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
+import {Grid} from "@mui/material";
 
-export const Home =()=> {
-  const [count, setCount] = useState(0)
+export const Home = () => {
+    return (
+        <Grid mt={10} className="home-container">
+            <header className="hero" >
+                <h1 className="hero-title">Bienvenue sur Sentinel</h1>
+                <p className="hero-subtitle">
+                    Gérez vos serveurs, consultez vos métriques et gardez un œil sur vos logs en toute simplicité.
+                </p>
+                <div className="hero-actions">
+                    <a href="http://82.165.92.40:3000/" className="hero-button primary">
+                        📊 Dashboard Grafana
+                    </a>
+                    <a href="/servers" className="hero-button secondary">
+                        🖥️ Gestion des serveurs
+                    </a>
+                    <a href="/servers/add" className="hero-button success">
+                        ➕ Ajouter une nouvelle range
+                    </a>
+                    <a href="/servers/delete" className="hero-button danger">
+                        ❌ Supprimer un serveur
+                    </a>
+                </div>
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
-
+                {/* Sous-section */}
+                <section className="extra-section">
+                    <h2 className="extra-title">Autres outils</h2>
+                    <div className="extra-actions">
+                        <a href="http://82.165.46.201/" className="hero-button secondary">
+                            🛒 Consulter la boutique
+                        </a>
+                        <a href="http://82.165.44.233/" className="hero-button secondary">
+                            ⚙️ Consulter le configurateur
+                        </a>
+                    </div>
+                </section>
+            </header>
+        </Grid>
+    );
+};
