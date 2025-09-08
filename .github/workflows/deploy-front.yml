@@ -1,0 +1,114 @@
+name: Front CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "front/**"
+      - ".github/workflows/deploy-front.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: front-deploy
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: sentinel-front
+  APP_NAME: sentinel-front-app
+  EXPOSED_PORT: "8088"
+  INTERNAL_PORT: "80"
+  NETWORK_NAME: sentinel-front
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Génère des tags utiles : latest, sha, run-number
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=sha-${{ github.sha }}
+            type=raw,value=v${{ github.run_number }}
+
+      # Build & push (le repo Docker Hub est créé automatiquement au 1er push)
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./front
+          file: ./front/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          cache-to: type=inline
+
+      # Déploiement via SSH (sans impacter le reste)
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          # Utilise KEY si tu as une clé privée; sinon PASSWORD comme ci-dessous
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -euo pipefail
+
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
+            APP="${{ env.APP_NAME }}"
+            NET="${{ env.NETWORK_NAME }}"
+            EXTERNAL_PORT="${{ env.EXPOSED_PORT }}"
+            INTERNAL_PORT="${{ env.INTERNAL_PORT }}"
+
+            echo "==> Login (si registry privé, sinon skip)"
+            # docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" || true
+
+            echo "==> Pull de l'image"
+            docker pull "$IMAGE"
+
+            echo "==> Réseau dédié front (idempotent)"
+            docker network create "$NET" || true
+
+            echo "==> Existe-t-il déjà un container $APP ?"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
+              echo "Container existe, on le remplace proprement"
+              # Stop + Remove (uniquement ce container)
+              docker stop "$APP" || true
+              docker rm "$APP" || true
+            fi
+
+            echo "==> Run du nouveau container"
+            docker run -d \
+              --name "$APP" \
+              --restart unless-stopped \
+              --network "$NET" \
+              -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
+              -l com.sentinel.managed=true \
+              "$IMAGE"
+
+            echo "==> Healthcheck HTTP"
+            for i in $(seq 1 30); do
+              if curl -fsS "http://localhost:${EXTERNAL_PORT}/" >/dev/null; then
+                echo "Front OK sur port ${EXTERNAL_PORT}"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "Healthcheck KO"; exit 1
