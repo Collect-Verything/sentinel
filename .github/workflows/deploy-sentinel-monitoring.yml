@@ -68,23 +68,23 @@ jobs:
           port: 22
           script: |
             set -e
-            mkdir -p /root/sentinel
+            mkdir -p /root/sentinel-monitoring
 
       # 🏠 Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 🔁 Sync complet (ajouts/modifs/suppressions) du dossier sentinel/ vers /root/sentinel/
-      - name: Rsync repo/sentinel -> server:/root/sentinel (with delete)
+      # 🔁 Sync complet (ajouts/modifs/suppressions) du dossier sentinel-monitoring/ vers /root/sentinel-monitoring/
+      - name: Rsync repo/sentinel-monitoring -> server:/root/sentinel-monitoring (with delete)
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          test -d sentinel || { echo "Le dossier 'sentinel/' n'existe pas dans le repo"; exit 1; }
+          test -d sentinel-monitoring || { echo "Le dossier 'sentinel-monitoring/' n'existe pas dans le repo"; exit 1; }
           sshpass -e rsync -az --delete \
             -e "ssh -p 22 -o StrictHostKeyChecking=no" \
-            sentinel/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/sentinel/
+            sentinel-monitoring/ ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/sentinel-monitoring/
 
-      # 🚀 Déploiement depuis /root/sentinel
+      # 🚀 Déploiement depuis /root/sentinel-monitoring
       - name: Compose deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -94,7 +94,7 @@ jobs:
           port: 22
           script: |
             set -euo pipefail
-            cd /root/sentinel
+            cd /root/sentinel-monitoring
 
             echo "==> Validation de la config"
             docker compose config >/dev/null
