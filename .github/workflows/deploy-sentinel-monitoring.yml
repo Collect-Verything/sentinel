@@ -121,6 +121,11 @@ jobs:
           port: 22
           script: |
             set -e
+            
+            set -e
+            echo "⏳ Attente du démarrage des services..."
+            sleep 20
+            
             echo "Prometheus:" && curl -sf http://localhost:9090/-/ready && echo " OK"
             echo "Loki:"       && curl -sf http://localhost:3100/ready   && echo " OK"
             echo "Grafana:"    && curl -sf http://localhost:3000/login   && echo " OK"
