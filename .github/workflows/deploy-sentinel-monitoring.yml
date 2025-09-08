@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'sentinel/**'
+      - '../../sentinel-monitoring/**'
       - '.github/workflows/deploy-sentinel-monitoring.yml'
 
 concurrency:
