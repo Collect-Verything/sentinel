@@ -18,6 +18,7 @@ export const MainAppBar = () => {
                         color="inherit"
                         aria-label="menu"
                         sx={{mr: 2}}
+                        href="/"
                     >
                         Sentinel
                     </IconButton>

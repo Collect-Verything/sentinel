@@ -3,6 +3,7 @@ import {Login} from "../pages/login";
 import {Error404} from "../pages/404";
 import {Home} from "../pages/home";
 import {MainLayout} from "../pages/main-layout";
+import {AddServers} from "../pages/add-servers";
 
 export const router = createBrowserRouter([
     {
@@ -12,6 +13,10 @@ export const router = createBrowserRouter([
             {
                 path: "/",
                 element: <Home/>,
+            },
+            {
+                path: "/add-servers",
+                element: <AddServers/>,
             },
         ],
     },
