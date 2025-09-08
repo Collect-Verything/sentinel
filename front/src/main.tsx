@@ -1,14 +1,7 @@
 import './index.css'
-import {Home} from './pages/home'
-import {BrowserRouter, Route, Routes} from "react-router";
 import ReactDOM from "react-dom/client";
+import {App} from "./app/app.tsx";
 
-const root = document.getElementById("root");
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<App/>);
 
-ReactDOM.createRoot(root!).render(
-    <BrowserRouter>
-        <Routes>
-            <Route path="/" element={<Home/>}/>
-        </Routes>
-    </BrowserRouter>,
-);
+
