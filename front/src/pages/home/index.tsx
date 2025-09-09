@@ -23,6 +23,7 @@ export const Home = () => {
                     <a href="/delete-servers" className="hero-button danger">
                         ❌ Supprimer un serveur
                     </a>
+                    <p>TEST</p>
                 </div>
 
                 {/* Sous-section */}

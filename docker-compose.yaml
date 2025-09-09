@@ -4,13 +4,13 @@ services:
   # DEV
   client-dev:
     build:
-      context: .
+      context: ./front
       dockerfile: Dockerfile.dev
     container_name: sentinel-front-dev
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
+      - ./front:/app
       - /app/node_modules
     environment:
       NODE_ENV: development
@@ -22,7 +22,7 @@ services:
   # PROD
   client:
     build:
-      context: .
+      context: ./front
       dockerfile: Dockerfile
     container_name: sentinel-front-app
     ports:
