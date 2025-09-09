@@ -126,6 +126,42 @@ Le projet est entièrement **versionné et automatisé**.
 
 ---
 
+## 🚀 Lancer App en mode dév
+
+Le projet utilise les **profiles** de Docker Compose pour isoler les environnements.
+En **mode dev**, on démarre le front, l’API NestJS et la base MySQL en une seule commande :
+
+```bash
+docker compose --profile dev up -d
+```
+
+### 📂 Services inclus
+
+* `client-dev` → Front React (Vite) sur [http://localhost:5173](http://localhost:5173)
+* `api-dev` → API NestJS sur [http://localhost:3001](http://localhost:3001)
+* `db-dev` → MySQL (user/pass définis dans `docker-compose.yml`), accessible aussi en local sur `localhost:3307`
+
+### 🔧 Commandes utiles
+
+* Arrêter l’environnement dev :
+
+  ```bash
+  docker compose --profile dev down
+  ```
+* Suivre les logs de l’API :
+
+  ```bash
+  docker compose logs -f api-dev
+  ```
+* Rebuild + relancer l’API :
+
+  ```bash
+  docker compose --profile dev up -d --build api-dev
+  ```
+
+---
+
+
 ## 🛠️ Roadmap
 
 * [x] Mise en place stack Docker Compose
