@@ -99,20 +99,6 @@ jobs:
               -e DB_PASS=apppass \
               -e DB_NAME=back \
               "$IMAGE"
-            
-
-#            TODO : Adaptger quand db sera en place
-#             ======================================================
-#             Étape optionnelle : exécuter Prisma migrate
-#             Décommente quand ta DB est en place
-#
-#             echo "==> Exécution des migrations Prisma"
-#             docker run --rm \
-#               --network "$NET" \
-#               -e DATABASE_URL="mysql://app:apppass@sentinel-mysql:3306/back" \
-#               "$IMAGE" npx prisma migrate deploy
-#             ======================================================
-#
 
             echo "==> Healthcheck API"
             for i in $(seq 1 30); do
