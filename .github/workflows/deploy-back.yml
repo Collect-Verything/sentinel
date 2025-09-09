@@ -1,0 +1,125 @@
+name: Back CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "back/**"
+      - ".github/workflows/deploy-back.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: back-deploy
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: sentinel-back
+  APP_NAME: sentinel-back
+  EXPOSED_PORT: "3001"
+  INTERNAL_PORT: "3001"
+  NETWORK_NAME: sentinel-back
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=sha-${{ github.sha }}
+            type=raw,value=v${{ github.run_number }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./back
+          file: ./back/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          cache-to: type=inline
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -euo pipefail
+
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
+            APP="${{ env.APP_NAME }}"
+            NET="${{ env.NETWORK_NAME }}"
+            EXTERNAL_PORT="${{ env.EXPOSED_PORT }}"
+            INTERNAL_PORT="${{ env.INTERNAL_PORT }}"
+
+            echo "==> Pull de l'image"
+            docker pull "$IMAGE"
+
+            echo "==> Réseau dédié back (idempotent)"
+            docker network create "$NET" || true
+
+            echo "==> Existe-t-il déjà un container $APP ?"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
+              echo "Container existe, on le remplace proprement"
+              docker stop "$APP" || true
+              docker rm "$APP" || true
+            fi
+
+            echo "==> Run du nouveau container"
+            docker run -d \
+              --name "$APP" \
+              --restart unless-stopped \
+              --network "$NET" \
+              -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
+              -e NODE_ENV=production \
+              -e DB_HOST=sentinel-mysql \
+              -e DB_PORT=3306 \
+              -e DB_USER=app \
+              -e DB_PASS=apppass \
+              -e DB_NAME=back \
+              "$IMAGE"
+            
+
+#            TODO : Adaptger quand db sera en place
+#             ======================================================
+#             Étape optionnelle : exécuter Prisma migrate
+#             Décommente quand ta DB est en place
+#
+#             echo "==> Exécution des migrations Prisma"
+#             docker run --rm \
+#               --network "$NET" \
+#               -e DATABASE_URL="mysql://app:apppass@sentinel-mysql:3306/back" \
+#               "$IMAGE" npx prisma migrate deploy
+#             ======================================================
+#
+
+            echo "==> Healthcheck API"
+            for i in $(seq 1 30); do
+              if curl -fsS "http://localhost:${EXTERNAL_PORT}/health" >/dev/null; then
+                echo "Back OK sur port ${EXTERNAL_PORT}"
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "Healthcheck KO"; exit 1
