@@ -1,8 +1,11 @@
 version: "3.9"
 
 services:
+  # =========================
   # DEV
+  # =========================
   client-dev:
+    profiles: [ "dev" ]
     build:
       context: ./front
       dockerfile: Dockerfile.dev
@@ -19,8 +22,56 @@ services:
     networks:
       - sentinel-front
 
+  api-dev:
+    profiles: ["dev"]
+    build:
+      context: ./back
+      dockerfile: Dockerfile.dev
+    container_name: sentinel-back-dev
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DB_HOST: db-dev
+      DB_PORT: 3306
+      DB_USER: app
+      DB_PASS: apppass
+      DB_NAME: back
+    volumes:
+      - ./back:/app
+      - /app/node_modules
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    networks:
+      - sentinel-back
+
+  db-dev:
+    profiles: ["dev"]
+    image: mysql:8.0
+    container_name: sentinel-mysql-dev
+    environment:
+      MYSQL_DATABASE: back
+      MYSQL_USER: app
+      MYSQL_PASSWORD: apppass
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Europe/Paris
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -proot --silent || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - sentinel-back
+  # =========================
   # PROD
+  # =========================
   client:
+    profiles: [ "prod" ]
     build:
       context: ./front
       dockerfile: Dockerfile
@@ -36,6 +87,11 @@ services:
       retries: 3
       start_period: 10s
 
+volumes:
+  mysql_dev_data:
+
 networks:
   sentinel-front:
+    driver: bridge
+  sentinel-back:
     driver: bridge
