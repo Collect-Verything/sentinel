@@ -1,8 +1,18 @@
-FROM node:22.14-alpine
-WORKDIR /app
+FROM node:20-alpine
+
+RUN apk add --no-cache netcat-openbsd openssl
+WORKDIR /back
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 EXPOSE 3001
-ENV NODE_ENV=development
-CMD ["npm", "run", "start:dev"]
+CMD sh -lc '\
+  echo "[wait-db] waiting for mysql-sentinel:3306..." && \
+  until nc -z mysql-sentinel 3306; do sleep 1; done && \
+  echo "[wait-db] DB is ready, running prisma..." && \
+  npx prisma generate && \
+  npx prisma migrate dev --name "Setup sentinel db" --skip-generate || true && \
+  npx prisma db seed || true && \
+  echo "[start] starting Nest (debug)..." && \
+  npm run start:debug \
+'

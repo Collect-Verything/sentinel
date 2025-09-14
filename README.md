@@ -31,6 +31,8 @@ La stack se compose des services suivants :
 sentinel/
 ├── .github/
 │   └── workflows/                 # Workflows CI/CD GitHub Actions
+├── back/                          # NestJs Backend
+├── front/                         # React frontend
 ├── documentation/                 # Documentation technique
 ├── sentinel/                      # Configuration principale
 │   ├── docker-compose.yml         # Docker Compose principal
@@ -65,6 +67,7 @@ cd sentinel
 2. **Lancer la stack**
 
 ```bash
+cd sentinel-monitoring
 docker compose up -d
 ```
 

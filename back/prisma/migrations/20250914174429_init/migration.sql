@@ -3,6 +3,7 @@ CREATE TABLE `Server` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ip` VARCHAR(191) NOT NULL,
     `configured` BOOLEAN NOT NULL DEFAULT false,
+    `range` INTEGER NOT NULL,
     `ownerClientId` INTEGER NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
