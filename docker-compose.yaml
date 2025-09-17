@@ -54,10 +54,11 @@ services:
     volumes:
       - mysql-sentinel-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-ppassword" ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -ppassword --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   # =========================
   # PROD
@@ -79,10 +80,58 @@ services:
       retries: 3
       start_period: 10s
 
+  api:
+    profiles: ["prod"]
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: sentinel-back
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "mysql://app:apppass@mysql-sentinel:3306/sentinel_db"
+    depends_on:
+      mysql-prod:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sentinel-back
+
+  mysql-prod:
+    profiles: ["prod"]
+    image: mysql:8
+    container_name: mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sentinel_db
+      MYSQL_USER: app
+      MYSQL_PASSWORD: apppass
+      TZ: Europe/Paris
+    volumes:
+      - mysql-prod-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uapp -papppass --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - sentinel-back
 
 volumes:
   mysql-sentinel-data:
+  mysql-prod-data:
 
 networks:
   sentinel-front:
+    driver: bridge
+  sentinel-back:
     driver: bridge
