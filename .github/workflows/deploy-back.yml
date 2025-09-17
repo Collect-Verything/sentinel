@@ -80,10 +80,33 @@ jobs:
             echo "==> Réseau dédié back (idempotent)"
             docker network create "$NET" || true
 
-            echo "==> Try to attach mysql-sentinel to $NET (if present)"
-            if docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
+            echo "==> Ensure MySQL exists (mysql-sentinel)"
+            if ! docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
+              echo "Starting mysql-sentinel..."
+              docker run -d \
+                --name mysql-sentinel \
+                --restart unless-stopped \
+                --network "$NET" \
+                -e MYSQL_ROOT_PASSWORD=root \
+                -e MYSQL_DATABASE=sentinel_db \
+                -e MYSQL_USER=app \
+                -e MYSQL_PASSWORD=apppass \
+                -e TZ=Europe/Paris \
+                -v mysql-sentinel-data:/var/lib/mysql \
+                mysql:8
+            else
+              echo "mysql-sentinel already exists; ensuring it is on network $NET"
               docker network connect "$NET" mysql-sentinel 2>/dev/null || true
+              docker start mysql-sentinel || true
             fi
+
+            echo "==> Wait for MySQL to be ready"
+            for i in $(seq 1 60); do
+              if docker exec mysql-sentinel sh -lc "mysqladmin ping -h 127.0.0.1 -uapp -papppass --silent"; then
+                echo "MySQL is ready"; break
+              fi
+              sleep 2
+            done
 
             echo "==> Existe-t-il déjà un container $APP ?"
             if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
