@@ -72,6 +72,7 @@ jobs:
             NET="${{ env.NETWORK_NAME }}"
             EXTERNAL_PORT="${{ env.EXPOSED_PORT }}"
             INTERNAL_PORT="${{ env.INTERNAL_PORT }}"
+            DATABASE_URL="mysql://app:apppass@mysql-sentinel:3306/sentinel_db"
 
             echo "==> Pull de l'image"
             docker pull "$IMAGE"
@@ -79,25 +80,25 @@ jobs:
             echo "==> Réseau dédié back (idempotent)"
             docker network create "$NET" || true
 
+            echo "==> Try to attach mysql-sentinel to $NET (if present)"
+            if docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
+              docker network connect "$NET" mysql-sentinel 2>/dev/null || true
+            fi
+
             echo "==> Existe-t-il déjà un container $APP ?"
             if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
-              echo "Container existe, on le remplace proprement"
               docker stop "$APP" || true
               docker rm "$APP" || true
             fi
 
             echo "==> Run du nouveau container"
-            docker run -d \
+              docker run -d \
               --name "$APP" \
               --restart unless-stopped \
               --network "$NET" \
               -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
               -e NODE_ENV=production \
-              -e DB_HOST=sentinel-mysql \
-              -e DB_PORT=3306 \
-              -e DB_USER=app \
-              -e DB_PASS=apppass \
-              -e DB_NAME=back \
+              -e DATABASE_URL="$DATABASE_URL" \
               "$IMAGE"
 
             echo "==> Healthcheck API"
