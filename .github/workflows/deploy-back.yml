@@ -6,6 +6,7 @@ on:
     paths:
       - "back/**"
       - ".github/workflows/deploy-back.yml"
+
   workflow_dispatch: {}
 
 concurrency:
@@ -56,6 +57,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
           cache-to: type=inline
+          no-cache: true
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
