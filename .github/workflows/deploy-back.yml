@@ -81,56 +81,56 @@ jobs:
             echo "==> Pull de l'image API"
             docker pull "$IMAGE"
             
-            echo "==> Réseau dédié back (idempotent)"
+            echo "==> Create network (idempotent)"
             docker network create "$NET" >/dev/null 2>&1 || true
-            
-            echo "==> Détection/Provisioning MySQL"
-            DB_HOST=""
-            if docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
-              DB_HOST="mysql-sentinel"
-              echo "   - MySQL existant détecté: $DB_HOST"
-              docker network connect "$NET" "$DB_HOST" >/dev/null 2>&1 || true
-              docker start "$DB_HOST" >/dev/null 2>&1 || true
-            elif docker ps -a --format '{{.Names}}' | grep -qx "mysql-prod"; then
-              DB_HOST="mysql-prod"
-              echo "   - MySQL existant détecté: $DB_HOST"
-              docker network connect "$NET" "$DB_HOST" >/devnull 2>&1 || true
-              docker start "$DB_HOST" >/dev/null 2>&1 || true
+
+            echo "==> Ensure single MySQL container named 'mysql-prod'"
+            DB_HOST="mysql-prod"
+
+            if docker ps -a --format '{{.Names}}' | grep -qx "mysql-prod"; then
+              echo "   - Found mysql-prod (OK)"
+              docker network connect "$NET" mysql-prod >/dev/null 2>&1 || true
+              docker start mysql-prod >/dev/null 2>&1 || true
+
+            elif docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
+              echo "   - Found legacy 'mysql-sentinel' -> renaming to 'mysql-prod'"
+              docker stop mysql-sentinel >/dev/null 2>&1 || true
+              docker rename mysql-sentinel mysql-prod
+              docker network connect "$NET" mysql-prod >/dev/null 2>&1 || true
+              docker start mysql-prod >/dev/null 2>&1 || true
+
             else
-              DB_HOST="mysql-prod"
-              echo "   - Aucun MySQL trouvé, création du conteneur $DB_HOST…"
+              echo "   - No MySQL found, creating 'mysql-prod'..."
               docker run -d \
-              --name "$DB_HOST" \
-              --restart unless-stopped \
-              --network "$NET" \
-              -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
-              -e MYSQL_DATABASE="$MYSQL_DATABASE" \
-              -e MYSQL_USER="$MYSQL_USER" \
-              -e MYSQL_PASSWORD="$MYSQL_PASSWORD" \
-              -e TZ="Europe/Paris" \
-              -v mysql-prod-data:/var/lib/mysql \
-              mysql:8.0.43
+                --name mysql-prod \
+                --restart unless-stopped \
+                --network "$NET" \
+                -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
+                -e MYSQL_DATABASE="$MYSQL_DATABASE" \
+                -e MYSQL_USER="$MYSQL_USER" \
+                -e MYSQL_PASSWORD="$MYSQL_PASSWORD" \
+                -e TZ="Europe/Paris" \
+                -v mysql-prod-data:/var/lib/mysql \
+                mysql:8.0.43
             fi
-            
-            echo "==> Attente de disponibilité MySQL ($DB_HOST)"
+
+            echo "==> Wait for MySQL (mysql-prod) to be ready"
             for i in $(seq 1 60); do
-              if docker exec "$DB_HOST" sh -lc "mysqladmin ping -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD --silent"; then
-                echo "   - MySQL OK"
+              if docker exec mysql-prod sh -lc "mysqladmin ping -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD --silent"; then
+                echo "   - MySQL is ready"
                 break
               fi
               sleep 2
             done
-            
-            # Construire la DATABASE_URL runtime avec l’hôte réellement utilisé
-            RUNTIME_DATABASE_URL="mysql://$MYSQL_USER:$MYSQL_PASSWORD@$DB_HOST:3306/$MYSQL_DATABASE"
-            
-            echo "==> Remplacement propre de l'API ($APP)"
+
+            RUNTIME_DATABASE_URL="mysql://$MYSQL_USER:$MYSQL_PASSWORD@mysql-prod:3306/$MYSQL_DATABASE"
+
+            echo '==> Replace API container'
             if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
               docker stop "$APP" >/dev/null 2>&1 || true
-              docker rm "$APP"   >/dev/null 2>&1 || true
+              docker rm   "$APP" >/dev/null 2>&1 || true
             fi
-            
-            echo "==> Lancement de la nouvelle API"
+
             docker run -d \
               --name "$APP" \
               --restart unless-stopped \
@@ -139,15 +139,14 @@ jobs:
               -e NODE_ENV=production \
               -e DATABASE_URL="$RUNTIME_DATABASE_URL" \
               "$IMAGE"
-            
+
             echo "==> Healthcheck API"
             for i in $(seq 1 60); do
               if curl -fsS "http://localhost:${EXTERNAL_PORT}/health" >/dev/null; then
-                echo "   - Back OK sur port ${EXTERNAL_PORT}"
+                echo "   - Back OK on port ${EXTERNAL_PORT}"
                 exit 0
               fi
               sleep 2
             done
-            
-            echo "Healthcheck KO"; exit 1
 
+            echo "Healthcheck KO"; exit 1
