@@ -74,6 +74,12 @@
     margin-top: 2px;
 }
 
+.valid-icon{
+    color: #4cd977;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
 .page-footer {
     margin-top: 2rem;
 }

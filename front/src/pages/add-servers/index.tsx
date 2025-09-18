@@ -1,7 +1,29 @@
 import './index.css';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
+
+import Papa, {type ParseResult} from "papaparse";
+import {useState} from "react";
+
+// TODO : Alerte pop up if file is incorrect ... main error for format, extension ...
 
 export const AddServers = () => {
+
+    const [file, setFile] = useState<ParseResult<unknown>>()
+
+    const handleFile = (event: any) => {
+        const files = event.target.files;
+        if (files) {
+            Papa.parse(files[0], {
+                    complete: function (results) {
+                        setFile(results);
+                    }
+                }
+            )
+        }
+    }
+
+
     return (
         <div className="page-container">
             <header className="page-header">
@@ -20,21 +42,36 @@ export const AddServers = () => {
                     id="csv-upload"
                     accept=".csv"
                     className="file-input"
+                    // onChange={handleChange}
+                    onChange={(e) => handleFile(e)
+                    }
                 />
 
                 <div className="info-bubble">
-                    <InfoOutlinedIcon className="info-icon" />
-                    <span>
-            Voici le format à respecter :
-            <br />
-            <code>hostname,ip,location</code>
-          </span>
+                    {file ?
+                    <DoneOutlineIcon className="valid-icon"/>
+                        :
+                    <InfoOutlinedIcon className="info-icon"/>
+                    }
+
+                    {file ?
+                        <span>Fichier valide</span>
+                        :
+                        <span>
+                            Voici le format à respecter :
+                            <br/>
+                            <code>hostname,ip,location</code>
+                        </span>
+                    }
+
                 </div>
 
-                <button className="hero-button success">📤 Envoyer</button>
+                <button className={`hero-button ${file ? "success" : ""}`} disabled={!file}>📤 Envoyer</button>
             </section>
 
             <footer className="page-footer">
+
+
                 <a href="/servers" className="hero-button secondary">
                     🖥️ Retour à la gestion des serveurs
                 </a>
