@@ -4,6 +4,7 @@
 
 * [ ] Ajouter les fichiers CSV
 * [ ] Parser les CSV en JSON
+* [ ] Amelirer modele Server, regarder server.csv ...Donc modifier egalement le seed etc ...
 * [ ] Envoyer le JSON au backend et persister dans la base **Sentinel DB**
 
 ---
