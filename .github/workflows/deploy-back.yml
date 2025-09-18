@@ -72,7 +72,7 @@ jobs:
             NET="${{ env.NETWORK_NAME }}"
             EXTERNAL_PORT="${{ env.EXPOSED_PORT }}"
             INTERNAL_PORT="${{ env.INTERNAL_PORT }}"
-            DATABASE_URL="mysql://app:apppass@mysql-sentinel:3306/sentinel_db"
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
 
             echo "==> Pull de l'image"
             docker pull "$IMAGE"

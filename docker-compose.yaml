@@ -89,7 +89,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: "mysql://app:apppass@mysql-sentinel:3306/sentinel_db"
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       mysql-prod:
         condition: service_healthy
@@ -110,15 +110,15 @@ services:
     container_name: mysql-prod
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sentinel_db
-      MYSQL_USER: app
-      MYSQL_PASSWORD: apppass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Europe/Paris
     volumes:
       - mysql-prod-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uapp -papppass --silent"]
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER} -p${MYSQL_PASSWORD} --silent" ]
       interval: 10s
       timeout: 5s
       retries: 30
