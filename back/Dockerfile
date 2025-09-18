@@ -20,6 +20,6 @@ CMD sh -lc '\
   for i in $(seq 1 60); do npx prisma migrate deploy && break || (echo "retry $i/60" && sleep 2); done; \
   echo "[seed] prisma db seed (non-fatal)"; \
   npm run seed || true; \
-  echo "[start] node dist/main.js"; \
-  node dist/main.js \
+  echo "[start] node dist/src/main.js"; \
+  node dist/src/main.js \
 '
