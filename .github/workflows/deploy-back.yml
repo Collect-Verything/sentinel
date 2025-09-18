@@ -66,47 +66,88 @@ jobs:
           port: 22
           script: |
             set -euo pipefail
-
+            
             IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest"
             APP="${{ env.APP_NAME }}"
             NET="${{ env.NETWORK_NAME }}"
             EXTERNAL_PORT="${{ env.EXPOSED_PORT }}"
             INTERNAL_PORT="${{ env.INTERNAL_PORT }}"
-            DATABASE_URL="${{ secrets.DATABASE_URL }}"
-
-            echo "==> Pull de l'image"
+            
+            MYSQL_ROOT_PASSWORD="${{ secrets.MYSQL_ROOT_PASSWORD }}"
+            MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
+            MYSQL_USER="${{ secrets.MYSQL_USER }}"
+            MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
+            
+            echo "==> Pull de l'image API"
             docker pull "$IMAGE"
-
+            
             echo "==> Réseau dédié back (idempotent)"
-            docker network create "$NET" || true
-
-            echo "==> Try to attach mysql-sentinel to $NET (if present)"
+            docker network create "$NET" >/dev/null 2>&1 || true
+            
+            echo "==> Détection/Provisioning MySQL"
+            DB_HOST=""
             if docker ps -a --format '{{.Names}}' | grep -qx "mysql-sentinel"; then
-              docker network connect "$NET" mysql-sentinel 2>/dev/null || true
-            fi
-
-            echo "==> Existe-t-il déjà un container $APP ?"
-            if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
-              docker stop "$APP" || true
-              docker rm "$APP" || true
-            fi
-
-            echo "==> Run du nouveau container"
+              DB_HOST="mysql-sentinel"
+              echo "   - MySQL existant détecté: $DB_HOST"
+              docker network connect "$NET" "$DB_HOST" >/dev/null 2>&1 || true
+              docker start "$DB_HOST" >/dev/null 2>&1 || true
+            elif docker ps -a --format '{{.Names}}' | grep -qx "mysql-prod"; then
+              DB_HOST="mysql-prod"
+              echo "   - MySQL existant détecté: $DB_HOST"
+              docker network connect "$NET" "$DB_HOST" >/devnull 2>&1 || true
+              docker start "$DB_HOST" >/dev/null 2>&1 || true
+            else
+              DB_HOST="mysql-prod"
+              echo "   - Aucun MySQL trouvé, création du conteneur $DB_HOST…"
               docker run -d \
+              --name "$DB_HOST" \
+              --restart unless-stopped \
+              --network "$NET" \
+              -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
+              -e MYSQL_DATABASE="$MYSQL_DATABASE" \
+              -e MYSQL_USER="$MYSQL_USER" \
+              -e MYSQL_PASSWORD="$MYSQL_PASSWORD" \
+              -e TZ="Europe/Paris" \
+              -v mysql-prod-data:/var/lib/mysql \
+              mysql:8.0.43
+            fi
+            
+            echo "==> Attente de disponibilité MySQL ($DB_HOST)"
+            for i in $(seq 1 60); do
+              if docker exec "$DB_HOST" sh -lc "mysqladmin ping -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD --silent"; then
+                echo "   - MySQL OK"
+                break
+              fi
+              sleep 2
+            done
+            
+            # Construire la DATABASE_URL runtime avec l’hôte réellement utilisé
+            RUNTIME_DATABASE_URL="mysql://$MYSQL_USER:$MYSQL_PASSWORD@$DB_HOST:3306/$MYSQL_DATABASE"
+            
+            echo "==> Remplacement propre de l'API ($APP)"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
+              docker stop "$APP" >/dev/null 2>&1 || true
+              docker rm "$APP"   >/dev/null 2>&1 || true
+            fi
+            
+            echo "==> Lancement de la nouvelle API"
+            docker run -d \
               --name "$APP" \
               --restart unless-stopped \
               --network "$NET" \
               -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
               -e NODE_ENV=production \
-              -e DATABASE_URL="$DATABASE_URL" \
+              -e DATABASE_URL="$RUNTIME_DATABASE_URL" \
               "$IMAGE"
-
+            
             echo "==> Healthcheck API"
-            for i in $(seq 1 30); do
+            for i in $(seq 1 60); do
               if curl -fsS "http://localhost:${EXTERNAL_PORT}/health" >/dev/null; then
-                echo "Back OK sur port ${EXTERNAL_PORT}"
+                echo "   - Back OK sur port ${EXTERNAL_PORT}"
                 exit 0
               fi
               sleep 2
             done
+            
             echo "Healthcheck KO"; exit 1
+
