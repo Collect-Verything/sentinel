@@ -24,7 +24,7 @@ EXPOSE 3001
 CMD sh -lc '\
   echo "[migrate] prisma migrate deploy (retry)"; \
   for i in $(seq 1 60); do npx prisma migrate deploy && break || (echo "retry $i/60" && sleep 2); done; \
-  echo "[seed] prisma db seed (non-fatal)"; \
+  echo "[seed] prisma db seed:prod (non-fatal)"; \
   npm run seed:prod || true; \
   echo "[start] node dist/src/main.js"; \
   node dist/src/main.js \
