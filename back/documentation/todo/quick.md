@@ -9,8 +9,11 @@
 - [ ] Display ansible config
 - [ ] Display providers
 - [ ] Creer une branche dev avec regle sur main et dev, tets et lint pour dev sur une branche feature car l'app commence a devenir semnsible
+- [ ] Creer un credential dans le header des requete (util web) accepté par le back end (main.ts) secret github ..;
 
-
+## Hot fix
+- [x] Fix migration server prod + doc issue
+- [ ] Fix rendu des pages /servers en prod qui renvoi un 404
 
 *note1:
 
