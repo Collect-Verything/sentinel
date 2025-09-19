@@ -12,6 +12,7 @@
 ## 2. Gestion des serveurs (UI + backend)
 
 * [ ] Créer une section **Serveurs configurés**
+* [ ] Créer une section **Ansible configue** qui permet de selectionner un nouveau chemin de config applicable pour les prpchaine range ( a creer a la main au prealable ... pour le moment)
 
     * Tableau listant les serveurs déjà configurés (vue simple dans un premier temps)
 * [ ] Créer une section **Serveurs non configurés**
