@@ -1,35 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ServersService } from './servers.service';
-import { CreateServerDto } from './dto/create-server.dto';
-import { UpdateServerDto } from './dto/update-server.dto';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {ServersService} from './servers.service';
+import {UpdateServerDto} from './dto/update-server.dto';
+import {SERVER_STATUS} from "./entities/enums";
 
 @Controller('servers')
 export class ServersController {
-  constructor(private readonly serversService: ServersService) {}
+    constructor(private readonly serversService: ServersService) {
+    }
 
-  @Post()
-  create(@Body() createServerDto: any) {
-  // create(@Body() createServerDto: CreateServerDto) {
-    return this.serversService.create(createServerDto);
-  }
+    @Post()
+    create(@Body() createServerDto: any) {
+        // create(@Body() createServerDto: CreateServerDto) {
+        return this.serversService.create(createServerDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.serversService.findAll();
-  }
+    @Get()
+    findAll() {
+        return this.serversService.findAll();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.serversService.findOne(+id);
-  }
+    @Get("by-config/:configurationType")
+    findAllByConfig(@Param('configurationType') configurationType: SERVER_STATUS) {
+        return this.serversService.findAllByConfig(configurationType);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
-    return this.serversService.update(+id, updateServerDto);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.serversService.findOne(+id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.serversService.remove(+id);
-  }
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
+        return this.serversService.update(+id, updateServerDto);
+    }
+
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.serversService.remove(+id);
+    }
 }

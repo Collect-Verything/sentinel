@@ -8,13 +8,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {columnsServer} from "../../common/datagrid/servers.ts";
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
 
-export const Servers = () => {
+export const ServersConfig = () => {
 
     const [rows, setRows] = useState<Server[]>([]);
-    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({type: 'include', ids: new Set()});
 
     useEffect(() => {
-        apiGet(`${SERVERS_PATH}/by-config/${SERVER_STATUS.CONFIGURED}`).then(setRows).catch(console.error);
+        apiGet(`${SERVERS_PATH}/by-config/${SERVER_STATUS.PENDING}`).then(setRows).catch(console.error);
     }, [])
 
     useEffect(() => {

@@ -83,6 +83,11 @@ html, body, #root {
     color: #f1f5f9;
 }
 
+.hero-button.inter {
+    background: #c5b92a;
+    color: #f1f5f9;
+}
+
 /* Sous-section */
 .extra-section {
     margin-top: 3rem;
