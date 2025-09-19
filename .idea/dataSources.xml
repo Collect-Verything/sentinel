@@ -13,7 +13,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="Docker Db Sentinel" uuid="e43d2c54-17b7-49b9-915e-2de92ed0659c">
+    <data-source source="LOCAL" name="Local Docker Db Sentinel" uuid="e43d2c54-17b7-49b9-915e-2de92ed0659c">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
