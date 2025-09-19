@@ -8,13 +8,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ServerStatus {
+  PENDING
+  CONFIGURING
+  CONFIGURED
+  ERROR
+}
+
+enum HealthStatus {
+  OK
+  WARN
+  CRIT
+  UNKNOWN
+}
+
+enum SshAuthMethod {
+  PASSWORD
+  KEY
+}
+
 model Server {
-  id            Int      @id @default(autoincrement())
-  ip            String   @unique
-  configured    Boolean  @default(false)
-  range         Int
-  ownerClientId Int
-  password      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id       Int          @id @default(autoincrement())
+  serverIp String       @unique @db.VarChar(64) // IPv4/IPv6/hostname
+  status   ServerStatus @default(PENDING)
+  isSsl    Boolean      @default(false)
+
+  cores     Int
+  ramMb     Int
+  storageGb Int
+  provider  String? @db.VarChar(100) // optionnel pour éviter les seeds foireux
+
+  // Attribution & lots
+  ownerClientId   Int  @default(0)
+  batchId         Int? // vague/lot de config
+  ansibleConfigId Int? // recette Ansible appliquée
+
+  // SSH (POC)
+  sshUser     String        @db.VarChar(64)
+  sshPort     Int?          @default(22)
+  sshAuth     SshAuthMethod @default(PASSWORD)
+  sshPassword String? // POC => en clair...osef sinon utiliser secret manager a voire pour un eventuel todo
+
+  // Observabilité
+  health      HealthStatus @default(UNKNOWN)
+  lastSeenAt  DateTime?
+  lastCheckAt DateTime?
+
+  // Relations
+  ansibleConfig AnsibleConfig? @relation(fields: [ansibleConfigId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerClientId])
+  @@index([status])
+  @@index([provider])
+  @@index([ansibleConfigId])
+  @@index([batchId])
+  @@unique([serverIp, sshPort])
+}
+
+model AnsibleConfig {
+  id             Int     @id @default(autoincrement())
+  name           String  @db.VarChar(120)
+  editorFullname String? @db.VarChar(120)
+  playbookPath   String  @db.VarChar(255) // chemin sur le serveur
+  variablesJson  String? @db.Text // JSON stringifié si besoin pour un futur upgrade genre edition a la main dans le navigateur ... si creation, nouveau fichier et donc persister son chemin ... a voir ...
+
+  servers Server[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+  @@index([name])
 }
