@@ -46,6 +46,11 @@ jobs:
             type=raw,value=latest
             type=raw,value=sha-${{ github.sha }}
             type=raw,value=v${{ github.run_number }}
+            
+      - name: Create .env.production
+        run: |
+          mkdir -p front
+          echo "VITE_API_BASE=${{ vars.SSH_HOST }}" > front/.env.production
 
       # Build & push (le repo Docker Hub est créé automatiquement au 1er push)
       - name: Build and push
