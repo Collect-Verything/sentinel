@@ -8,6 +8,7 @@ export class ServersService {
     constructor(private prisma: PrismaService) {}
 
     create(createServerDto: CreateServerDto) {
+        console.log(createServerDto);
     return 'This action adds a new server';
   }
 

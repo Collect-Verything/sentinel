@@ -8,7 +8,8 @@ export class ServersController {
   constructor(private readonly serversService: ServersService) {}
 
   @Post()
-  create(@Body() createServerDto: CreateServerDto) {
+  create(@Body() createServerDto: any) {
+  // create(@Body() createServerDto: CreateServerDto) {
     return this.serversService.create(createServerDto);
   }
 
