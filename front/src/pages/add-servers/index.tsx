@@ -4,8 +4,11 @@ import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
 import Papa, {type ParseResult} from "papaparse";
 import {useState} from "react";
+import {apiPost} from "../../common/utils/web";
+import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 
 // TODO : Alerte pop up if file is incorrect ... main error for format, extension ...
+// TODO : Creer web util, voire meme creer un package npm histoire de ...
 
 export const AddServers = () => {
 
@@ -21,6 +24,11 @@ export const AddServers = () => {
                 }
             )
         }
+    }
+
+    const sendFile = () => {
+        // TODO : FIX
+        apiPost(SERVERS_PATH, file)
     }
 
 
@@ -49,9 +57,9 @@ export const AddServers = () => {
 
                 <div className="info-bubble">
                     {file ?
-                    <DoneOutlineIcon className="valid-icon"/>
+                        <DoneOutlineIcon className="valid-icon"/>
                         :
-                    <InfoOutlinedIcon className="info-icon"/>
+                        <InfoOutlinedIcon className="info-icon"/>
                     }
 
                     {file ?
@@ -65,13 +73,10 @@ export const AddServers = () => {
                     }
 
                 </div>
-
-                <button className={`hero-button ${file ? "success" : ""}`} disabled={!file}>📤 Envoyer</button>
+                <button className={`hero-button ${file ? "success" : ""}`} disabled={!file} onClick={sendFile}>📤 Envoyer</button>
             </section>
 
             <footer className="page-footer">
-
-
                 <a href="/servers" className="hero-button secondary">
                     🖥️ Retour à la gestion des serveurs
                 </a>
