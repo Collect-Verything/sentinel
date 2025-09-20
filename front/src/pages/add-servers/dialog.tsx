@@ -42,10 +42,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Disagree</Button>
-                    <Button onClick={handleClose} autoFocus>
-                        Agree
-                    </Button>
+                    <Button color="error" onClick={handleClose}>Annuler l'operation</Button>
                 </DialogActions>
             </Dialog>
         </>
