@@ -34,8 +34,8 @@ export class ServersController {
         return this.serversService.update(+id, updateServerDto);
     }
 
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.serversService.remove(+id);
+    @Delete()
+    async remove(@Body('serversToDelete') serversToDelete: number[]) {
+        return this.serversService.remove(serversToDelete);
     }
 }

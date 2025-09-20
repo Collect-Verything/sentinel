@@ -34,8 +34,12 @@ export class ServersService {
         return `This action updates a #${id} server`;
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} server`;
+    async remove(serversToDelete: number[]) {
+        return this.prisma.server.deleteMany({
+            where: {
+                id: { in: serversToDelete },
+            },
+        });
     }
 }
 

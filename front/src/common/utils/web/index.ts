@@ -29,7 +29,7 @@ export const apiPost = (path: string, data: unknown) => apiRequest(path, "POST",
 
 export const apiPatch = (path: string, data?: unknown) => apiRequest(path, "PATCH", data);
 
-export const apiDelete = (path: string) => apiRequest(path, "DELETE");
+export const apiDelete = (path: string, data?: unknown) => apiRequest(path, "DELETE", data);
 
 export const throwErrorResponse = async (res: Response) => {
     if (!res.ok) {
