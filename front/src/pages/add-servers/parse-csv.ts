@@ -64,7 +64,7 @@ export function parseServerCsvToJson(file: File): Promise<ServerCreate[]> {
                         ownerClientId: toNum(row.ownerClientId, 0),
                         batchId: 0,
 
-                        ansibleConfigId: 0,
+                        ansibleConfig: undefined,
                         sshUser: String(row.sshUser ?? "").trim(),
                         sshPort: row.sshPort === "" || row.sshPort == null ? 22 : Number(row.sshPort),
                         sshAuth: (row.sshAuth as ServerCreate["sshAuth"]) ?? "PASSWORD",

@@ -25,7 +25,7 @@ export interface Server {
     health: "OK" | "WARN" | "UNKNOWN" | "CRIT"
     lastSeenAt: string
     lastCheckAt: string
-    ansibleConfigId: number
+    ansibleConfig: number|undefined
     createdAt:  String
     updatedAt:  String
 }
