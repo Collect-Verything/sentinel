@@ -18,7 +18,7 @@ export class ServersService {
             const created = await this.prisma.$transaction(
                 listServer.map((server: any) => this.prisma.server.create({data: server})),
             );
-            return created.map((c) => c.id)
+            return{listId: created.map((c) => c.id)}
         } catch (err) {
             return Promise.reject(err);
         }

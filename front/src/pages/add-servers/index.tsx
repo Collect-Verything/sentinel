@@ -4,7 +4,7 @@ import type {Server} from "../../common/types/backend";
 import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
-import {type AlertColor} from "@mui/material";
+import {type AlertColor, Grid} from "@mui/material";
 import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alert-message.tsx";
 
 // TODO : Creer web util, voire meme creer un package npm histoire de ...
@@ -13,22 +13,24 @@ export const AddServers = () => {
 
     const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
     const [alert, setAlert] = useState<AlertColor | "validconv">("info");
+    const [idsServerReadyToConfig, setIdsServerReadyToConfig] = useState<number[]>();
 
     const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
         setAlert("info");
         const file = event.target.files?.[0];
-        if (file) parseServerCsvToJson(file).then((res)=>{
+        if (file) parseServerCsvToJson(file).then((res) => {
             setServerList(res)
             setAlert("validconv")
-        }).catch(()=>{
+        }).catch(() => {
             setAlert("warning")
         });
     };
 
 
     const sendFile = () => {
-        apiPost(SERVERS_PATH, serverList).then(() => {
+        apiPost(SERVERS_PATH, serverList).then((res) => {
             setAlert("success");
+            setIdsServerReadyToConfig(res.listId)
             // keep id created to configure in model
         }).catch(() => {
             setAlert("error");
@@ -59,14 +61,21 @@ export const AddServers = () => {
                     }
                 />
 
-                <div className="info-bubble">
-                    {ErrorServerPersistenceIcon[alert]}
-                    <span>
-                        {ErrorServerPersistenceMessage[alert]}
-                    </span>
-                </div>
+                <Grid className="info-bubble" container direction="column">
+                    <Grid margin={"auto"} container spacing={3} alignItems="center">
+                        <Grid margin={"left"}>
+                            {ErrorServerPersistenceIcon[alert]}
+                        </Grid>
+                        <Grid>
+                            {ErrorServerPersistenceMessage[alert]}
+                        </Grid>
+                    </Grid>
+                    <Grid margin={"auto"}>
+                        {idsServerReadyToConfig && <button>🎛️ Configurer cette range</button>}
+                    </Grid>
+                </Grid>
                 <button
-                    className={`hero-button ${alert === "validconv" ? "success":""}`}
+                    className={`hero-button ${alert === "validconv" ? "success" : ""}`}
                     disabled={alert !== "validconv"}
                     onClick={sendFile}
                 >
