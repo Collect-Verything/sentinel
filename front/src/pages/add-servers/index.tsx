@@ -6,14 +6,16 @@ import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import {type AlertColor, Grid} from "@mui/material";
 import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alert-message.tsx";
+import {DialogConfigServers} from "./dialog.tsx";
 
-// TODO : Creer web util, voire meme creer un package npm histoire de ...
+// TODO : Creer web util, voire meme creer un package npm pour le partage des type une fois que tout est stable
 
 export const AddServers = () => {
 
     const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
     const [alert, setAlert] = useState<AlertColor | "validconv">("info");
     const [idsServerReadyToConfig, setIdsServerReadyToConfig] = useState<number[]>();
+    const [openDialog, setOpenDialog] = useState(false);
 
     const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
         setAlert("info");
@@ -35,8 +37,11 @@ export const AddServers = () => {
         }).catch(() => {
             setAlert("error");
         })
-
     }
+
+    const handleOpenDialog = () => {
+        setOpenDialog(true);
+    };
 
 
     return (
@@ -71,7 +76,9 @@ export const AddServers = () => {
                         </Grid>
                     </Grid>
                     <Grid margin={"auto"}>
-                        {idsServerReadyToConfig && <button>🎛️ Configurer cette range</button>}
+                        {idsServerReadyToConfig &&
+                            <DialogConfigServers openDialog={openDialog} handleOpenDialog={handleOpenDialog} setOpenDialog={setOpenDialog} idsServerReadyToConfig={idsServerReadyToConfig}/>
+                        }
                     </Grid>
                 </Grid>
                 <button
