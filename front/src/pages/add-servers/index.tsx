@@ -18,16 +18,21 @@ export const AddServers = () => {
         const files = event.target.files;
         if (files) {
             Papa.parse(files[0], {
-                    complete: function (results) {
-                        setFile(results);
-                    }
+                header: true,
+                skipEmptyLines: true,
+                complete: function (results:ParseResult<unknown>) {
+                    setFile(results.data);
                 }
-            )
+            });
         }
-    }
+    };
+
 
     const sendFile = () => {
         // TODO : FIX
+
+
+
         apiPost(SERVERS_PATH, file)
     }
 

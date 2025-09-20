@@ -2,6 +2,7 @@ import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common'
 import {ServersService} from './servers.service';
 import {UpdateServerDto} from './dto/update-server.dto';
 import {SERVER_STATUS} from "./entities/enums";
+import {CreateServerDto} from "./dto/create-server.dto";
 
 @Controller('servers')
 export class ServersController {
@@ -9,9 +10,9 @@ export class ServersController {
     }
 
     @Post()
-    create(@Body() createServerDto: any) {
-        // create(@Body() createServerDto: CreateServerDto) {
-        return this.serversService.create(createServerDto);
+    async createMany(@Body() payload: CreateServerDto[]) {
+        const res = await this.serversService.createMany(payload);
+        return res;
     }
 
     @Get()
