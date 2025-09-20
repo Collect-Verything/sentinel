@@ -35,3 +35,4 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 - [x] Pre traitement et parsing dans le front avec un util pour le csv
 - [x] Try catch back error response durant persistance => get error dans le front dans la modal de config si erreur back
 - [ ] Il faudrait que quand on persisite des serveur deja existant, la liste des ip deja existate en base remonte dans le front pour en informer l'admin
+- [x] Creer alert sur la convention du fichier csv

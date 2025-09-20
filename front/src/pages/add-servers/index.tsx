@@ -1,40 +1,37 @@
 import './index.css';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 import {type ChangeEvent, useState} from "react";
 import type {Server} from "../../common/types/backend";
 import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
-import {Alert, type AlertColor, Grid} from "@mui/material";
+import {type AlertColor} from "@mui/material";
+import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alert-message.tsx";
 
-// TODO : Alerte pop up if file is incorrect ... main error for format, extension ...
 // TODO : Creer web util, voire meme creer un package npm histoire de ...
-
-enum ErrorServerPersistenceMessage  {
-    success = "Les serveurs ont bien été persistés",
-    error = "Une erreur est apparue durant la persistance",
-}
 
 export const AddServers = () => {
 
     const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
-    const [response, setResponse] = useState<{severity: AlertColor}>();
+    const [alert, setAlert] = useState<AlertColor | "validconv">("info");
 
     const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-        setResponse(undefined);
-
+        setAlert("info");
         const file = event.target.files?.[0];
-        if (file) parseServerCsvToJson(file).then(setServerList);
+        if (file) parseServerCsvToJson(file).then((res)=>{
+            setServerList(res)
+            setAlert("validconv")
+        }).catch(()=>{
+            setAlert("warning")
+        });
     };
 
 
     const sendFile = () => {
         apiPost(SERVERS_PATH, serverList).then(() => {
-            setResponse({severity:"success"});
+            setAlert("success");
             // keep id created to configure in model
         }).catch(() => {
-            setResponse({severity:"error"});
+            setAlert("error");
         })
 
     }
@@ -49,14 +46,6 @@ export const AddServers = () => {
                 </p>
             </header>
 
-            {response && (
-                <Grid m={3}>
-                    <Alert severity={response.severity}>
-                        {ErrorServerPersistenceMessage[response.severity]}
-                    </Alert>
-                </Grid>
-            )}
-
             <section className="form-section">
                 <label htmlFor="csv-upload" className="form-label">
                     Importer un fichier CSV
@@ -66,30 +55,23 @@ export const AddServers = () => {
                     id="csv-upload"
                     accept=".csv"
                     className="file-input"
-                    // onChange={handleChange}
                     onChange={(e) => handleFile(e)
                     }
                 />
 
                 <div className="info-bubble">
-                    {serverList ?
-                        <DoneOutlineIcon className="valid-icon"/>
-                        :
-                        <InfoOutlinedIcon className="info-icon"/>
-                    }
-
-                    {serverList ?
-                        <span>Fichier valide</span>
-                        :
-                        <span>
-                            Voici le format à respecter :
-                            <br/>
-                            <code>hostname,ip,location</code>
-                        </span>
-                    }
-
+                    {ErrorServerPersistenceIcon[alert]}
+                    <span>
+                        {ErrorServerPersistenceMessage[alert]}
+                    </span>
                 </div>
-                <button className={`hero-button ${serverList ? "success" : ""}`} disabled={!serverList} onClick={sendFile}>📤 Envoyer</button>
+                <button
+                    className={`hero-button ${alert === "validconv" ? "success":""}`}
+                    disabled={alert !== "validconv"}
+                    onClick={sendFile}
+                >
+                    📤 Envoyer
+                </button>
             </section>
 
             <footer className="page-footer">
