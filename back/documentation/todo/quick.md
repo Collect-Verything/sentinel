@@ -30,4 +30,7 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 # 20_09_2025
 - [ ] La selecton all du tableau ne selectionne rien 
 - [ ] Ajouter les nouvelle page dans le menu bar deroulant en haut a droite
-- [ ] Retourner la liste d'id des serveur ajouté a la creation
+- [x] Retourner la liste d'id des serveur ajouté a la creation
+- [ ] Modal qui porpose de lancer une config sur tout les id crée retourné, sinon ignorer
+- [x] Pre traitement et parsing dans le front avec un util pour le csv
+- [x] Try catch back error response durant persistance => get error dans le front dans la modal de config si erreur back
