@@ -6,28 +6,35 @@ import type {Server} from "../../common/types/backend";
 import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
+import {Alert, type AlertColor, Grid} from "@mui/material";
 
 // TODO : Alerte pop up if file is incorrect ... main error for format, extension ...
 // TODO : Creer web util, voire meme creer un package npm histoire de ...
 
+enum ErrorServerPersistenceMessage  {
+    success = "Les serveurs ont bien été persistés",
+    error = "Une erreur est apparue durant la persistance",
+}
+
 export const AddServers = () => {
 
     const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
-
+    const [response, setResponse] = useState<{severity: AlertColor}>();
 
     const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+        setResponse(undefined);
+
         const file = event.target.files?.[0];
         if (file) parseServerCsvToJson(file).then(setServerList);
     };
 
 
     const sendFile = () => {
-        apiPost(SERVERS_PATH, serverList).then((res)=>{
-            console.log(res);
+        apiPost(SERVERS_PATH, serverList).then(() => {
+            setResponse({severity:"success"});
             // keep id created to configure in model
-        }).catch(err=>{
-        //     If error modele error => restart
-            console.log(err);
+        }).catch(() => {
+            setResponse({severity:"error"});
         })
 
     }
@@ -41,6 +48,14 @@ export const AddServers = () => {
                     Rentrez ici votre nouvelle range de serveurs via CSV.
                 </p>
             </header>
+
+            {response && (
+                <Grid m={3}>
+                    <Alert severity={response.severity}>
+                        {ErrorServerPersistenceMessage[response.severity]}
+                    </Alert>
+                </Grid>
+            )}
 
             <section className="form-section">
                 <label htmlFor="csv-upload" className="form-label">
