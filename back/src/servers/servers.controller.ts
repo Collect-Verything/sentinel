@@ -11,8 +11,7 @@ export class ServersController {
 
     @Post()
     async createMany(@Body() payload: CreateServerDto[]) {
-        const res = await this.serversService.createMany(payload);
-        return res;
+        return await this.serversService.createMany(payload);
     }
 
     @Get()

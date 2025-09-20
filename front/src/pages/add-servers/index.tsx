@@ -1,9 +1,9 @@
 import './index.css';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
-
-import Papa, {type ParseResult} from "papaparse";
-import {useState} from "react";
+import {type ChangeEvent, useState} from "react";
+import type {Server} from "../../common/types/backend";
+import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 
@@ -12,28 +12,24 @@ import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 
 export const AddServers = () => {
 
-    const [file, setFile] = useState<ParseResult<unknown>>()
+    const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
 
-    const handleFile = (event: any) => {
-        const files = event.target.files;
-        if (files) {
-            Papa.parse(files[0], {
-                header: true,
-                skipEmptyLines: true,
-                complete: function (results:ParseResult<unknown>) {
-                    setFile(results.data);
-                }
-            });
-        }
+
+    const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) parseServerCsvToJson(file).then(setServerList);
     };
 
 
     const sendFile = () => {
-        // TODO : FIX
+        apiPost(SERVERS_PATH, serverList).then((res)=>{
+            console.log(res);
+            // keep id created to configure in model
+        }).catch(err=>{
+        //     If error modele error => restart
+            console.log(err);
+        })
 
-
-
-        apiPost(SERVERS_PATH, file)
     }
 
 
@@ -61,13 +57,13 @@ export const AddServers = () => {
                 />
 
                 <div className="info-bubble">
-                    {file ?
+                    {serverList ?
                         <DoneOutlineIcon className="valid-icon"/>
                         :
                         <InfoOutlinedIcon className="info-icon"/>
                     }
 
-                    {file ?
+                    {serverList ?
                         <span>Fichier valide</span>
                         :
                         <span>
@@ -78,7 +74,7 @@ export const AddServers = () => {
                     }
 
                 </div>
-                <button className={`hero-button ${file ? "success" : ""}`} disabled={!file} onClick={sendFile}>📤 Envoyer</button>
+                <button className={`hero-button ${serverList ? "success" : ""}`} disabled={!serverList} onClick={sendFile}>📤 Envoyer</button>
             </section>
 
             <footer className="page-footer">

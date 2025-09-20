@@ -1,24 +1,31 @@
+export interface AnsibleConfig {
+    id: number
+    name: string
+    editorFullname: string
+    playbookPath: string
+    variablesJson: string
+    servers: Server[]
+}
 
 export interface Server {
     id:        Number
-    serverIp:  String
-    status:    String
-    isSsl:     Boolean
-    cores:      Number
-    ramMb:      Number
-    storageGb:  Number
-    provider:   String
-    ownerClientId:    Number
-    batchId:          Number
-    ansibleConfigId:  Number
-    sshUser:      String
-    sshPort:      Number
-    sshAuth:      String
-    sshPassword:  String
-    health:       String
-    lastSeenAt:   String
-    lastCheckAt:  String
-    ansibleConfig:  String
+    serverIp: string
+    status: "PENDING" | "CONFIGURING" | "CONFIGURED" | "ERROR"
+    isSsl: boolean|string | undefined
+    cores: number
+    ramMb: number
+    storageGb: number
+    provider: string
+    ownerClientId: number
+    batchId: number
+    sshUser: string
+    sshPort: number
+    sshAuth: "PASSWORD" | "KEY"
+    sshPassword: string
+    health: "OK" | "WARN" | "UNKNOWN" | "CRIT"
+    lastSeenAt: string
+    lastCheckAt: string
+    ansibleConfig: AnsibleConfig
     createdAt:  String
     updatedAt:  String
 }

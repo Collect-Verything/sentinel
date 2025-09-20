@@ -2,6 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {UpdateServerDto} from './dto/update-server.dto';
 import {PrismaService} from "../prisma/prisma.service";
 import {SERVER_STATUS} from "./entities/enums";
+import {CreateServerDto} from "./dto/create-server.dto";
 
 // TODO :
 // - Typage
@@ -12,24 +13,15 @@ export class ServersService {
     constructor(private prisma: PrismaService) {
     }
 
-    async createMany(items: any[]) {
-        const cleanList = items.map((item) => ({
-            ...item,
-            isSsl: item.isSsl === 'true' || item.isSsl === true,
-            sshPort: item.sshPort ? Number(item.sshPort) : 22,
-            cores: item.cores ? Number(item.cores) : 0,
-            ramMb: item.ramMb ? Number(item.ramMb) : 0,
-            storageGb: item.storageGb ? Number(item.storageGb) : 0,
-            ownerClientId: item.ownerClientId ? Number(item.ownerClientId) : 0,
-            batchId: item.batchId ? Number(item.batchId) : 0,
-            ansibleConfigId:  item.ansibleConfigId ? Number(item.ansibleConfigId) : 0,
-        }));
-
-        const created = await this.prisma.$transaction(
-            cleanList.map((server) => this.prisma.server.create({ data: server })),
-        );
-
-        return created.map((c)=>c.id)
+    async createMany(listServer: CreateServerDto[]) {
+        try {
+            const created = await this.prisma.$transaction(
+                listServer.map((server: any) => this.prisma.server.create({data: server})),
+            );
+            return created.map((c) => c.id)
+        } catch (err) {
+            return Promise.reject(err);
+        }
     }
 
     findAll() {
@@ -51,7 +43,7 @@ export class ServersService {
     async remove(serversToDelete: number[]) {
         return this.prisma.server.deleteMany({
             where: {
-                id: { in: serversToDelete },
+                id: {in: serversToDelete},
             },
         });
     }
