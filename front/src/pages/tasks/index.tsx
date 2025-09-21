@@ -46,6 +46,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import Typography from "@mui/material/Typography";
+import {useTasks} from "../../contexts/TasksContext.tsx";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -57,6 +58,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export const Tasks = () => {
+    const { tasks, removeTask, clearCompleted } = useTasks();
 
     const [windowButton, setWindowButton] = useState(false);
     const [open, setOpen] = React.useState(false);
@@ -112,16 +114,32 @@ export const Tasks = () => {
                     </Toolbar>
                 </AppBar>
                 <List>
-                    <ListItemButton>
-                        <ListItemText primary="Phone ringtone" secondary="Titania"/>
-                    </ListItemButton>
-                    <Divider/>
-                    <ListItemButton>
-                        <ListItemText
-                            primary="Default notification ringtone"
-                            secondary="Tethys"
-                        />
-                    </ListItemButton>
+                    {/*<ListItemButton>*/}
+                    {/*    <ListItemText primary="Phone ringtone" secondary="Titania"/>*/}
+                    {/*</ListItemButton>*/}
+                    {/*<Divider/>*/}
+                    {/*<ListItemButton>*/}
+                    {/*    <ListItemText*/}
+                    {/*        primary="Default notification ringtone"*/}
+                    {/*        secondary="Tethys"*/}
+                    {/*    />*/}
+                    {/*</ListItemButton>*/}
+                    <div>
+                        <button onClick={clearCompleted}>Nettoyer terminées</button>
+
+                        <ul>
+                            {tasks && tasks.map((t) => (
+                                <li key={t.id} style={{ margin: "8px 0" }}>
+                                    <code>{t.id}</code> — <strong>{t.state}</strong>
+                                    {t.error ? <> — <span style={{ color: "tomato" }}>{t.error}</span></> : null}
+                                    {t.seconds ? <> — {t.seconds}s</> : null}
+                                    <button onClick={() => removeTask(t.id)} style={{ marginLeft: 8 }}>
+                                        supprimer
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </List>
             </Dialog>
         </>

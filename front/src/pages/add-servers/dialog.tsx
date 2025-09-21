@@ -11,6 +11,7 @@ import type {Configs} from "../../common/types/backend";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import {FormControl, InputLabel, Select, type SelectChangeEvent} from "@mui/material";
+import {useTasks} from "../../contexts/TasksContext.tsx";
 
 interface DialogConfigServersProps {
     setOpenDialog: Dispatch<SetStateAction<boolean>>
@@ -22,6 +23,7 @@ interface DialogConfigServersProps {
 
 export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog, idsServerReadyToConfig}: DialogConfigServersProps) => {
 
+    const { startTask } = useTasks();
     const [configs, setConfigs] = useState<Configs[]>();
     const [configSelected, setConfigSelected] = useState();
     const [responseConfig, setResponseConfig] = useState(false);
@@ -38,7 +40,10 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
 
 
     const handleLunchConfig = () => {
-        apiPost(`${CONFIGS_PATH}/lunch`, {configSelected: configSelected, listId: idsServerReadyToConfig}).then(() => setResponseConfig(true))
+        console.log('typeof startTask =', typeof startTask); // doit afficher "function"
+
+        startTask(20).catch(console.error);
+        // apiPost(`${CONFIGS_PATH}/lunch`, {configSelected: configSelected, listId: idsServerReadyToConfig}).then(() => setResponseConfig(true))
     }
 
     useEffect(() => {
