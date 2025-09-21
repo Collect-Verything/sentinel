@@ -40,3 +40,12 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 - [ ] Creer un web socket pour suivre la configuration en cours des serveur, donc petit onglet rabatable de suivi dans le front, du coup changer la logique de la dialog sur la response (...)
 - [ ] Gerer erreur a l'ajout des serveur avec precision, genre unique constraint key et ce genre de chose, mais en vrai pas urgent
 - [ ] Fusionner page servers et config-servers quand tout sera terminé
+
+
+# 21-09-2025
+- [x] Creer une tache fictive que l'on peut suivre redis + worker
+- [x] Creer un boutton dans main layout pour suivre cette tach
+- [x] Creer page glissante pour afficher la tache en cours
+- [ ] Creerr un context tasks pour declancher la tache dans une page puis la suivre dans la fenetre glissante
+- [ ] Integrer ansible à la logique du service fictif
+- [ ] Trouver un moyen grace au log d'afficher une bar de progression de la tache suvi par l'utilisateur
