@@ -1,13 +1,13 @@
 // prisma/seed.ts
 
-import { PrismaClient } from "@prisma/client";
+import {PrismaClient} from "@prisma/client";
 
 
 const prisma = new PrismaClient();
 
 async function main() {
     const server1 = await prisma.server.upsert({
-        where: { serverIp: '111.11.11' },
+        where: {serverIp: '111.11.11'},
         update: {},
         create: {
             serverIp: '111.11.11',
@@ -22,7 +22,7 @@ async function main() {
     });
 
     const server2 = await prisma.server.upsert({
-        where: { serverIp: '222.22.22' },
+        where: {serverIp: '222.22.22'},
         update: {},
         create: {
             serverIp: '222.22.22',
@@ -37,7 +37,7 @@ async function main() {
     });
 
     const server3 = await prisma.server.upsert({
-        where: { serverIp: '333.33.33' },
+        where: {serverIp: '333.33.33'},
         update: {},
         create: {
             serverIp: '333.33.33',
@@ -51,7 +51,29 @@ async function main() {
         },
     });
 
-    console.log({ server1, server2, server3 });
+    const config1 = await prisma.ansibleConfig.upsert({
+        where: {name: "client-base-product"},
+        update: {},
+        create: {
+            name: "client-base-product",
+            editorFullname: "Admin_Canse",
+            playbookPath: "/chemin/a/definir/plus/tard",
+            variablesJson: "config/client/cosinus*jean+pormanov",
+        }
+    })
+
+    const config2 = await prisma.ansibleConfig.upsert({
+        where: {name: "admin-base-monitoring"},
+        update: {},
+        create: {
+            name: "admin-base-monitoring",
+            editorFullname: "Admin_Canse",
+            playbookPath: "/chemin/a/definir/plus/tard",
+            variablesJson: "config/admin/cosinus*jean+pormanov",
+        }
+    })
+
+    console.log({server1, server2, server3, config1,config2});
 }
 
 main()
