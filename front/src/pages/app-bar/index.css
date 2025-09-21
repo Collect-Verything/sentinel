@@ -1,0 +1,40 @@
+/* Conteneur titre */
+.brand-sentinel {
+    display: inline-flex;
+    gap: 0.02em;
+    line-height: 1;
+}
+
+/* Letter transitions*/
+.brand-ch {
+    display: inline-block;
+    color: #a5b9ec;
+    transition:
+            transform 220ms ease,
+            color 220ms ease,
+            text-shadow 220ms ease;
+    text-shadow: 0 0 0 rgba(30,41,59,0);
+}
+
+/* Hover bouton + lettre*/
+button:hover .brand-ch,
+a:hover .brand-ch {
+    color: #f8fafc;
+    transform: translateY(-1.2px);
+    text-shadow: 0 1px 6px rgba(30,41,59,0.25);
+}
+
+/* Cascade 20ms */
+button:hover .brand-ch,
+a:hover .brand-ch {
+    transition-delay: calc(var(--i) * 20ms);
+}
+
+/* Reduction  anim */
+@media (prefers-reduced-motion: reduce) {
+    .brand-ch {
+        transition: color 150ms ease;
+        transform: none !important;
+        text-shadow: none !important;
+    }
+}
