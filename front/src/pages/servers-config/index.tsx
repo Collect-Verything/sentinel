@@ -33,7 +33,7 @@ export const ServersConfig = () => {
     return (
         <>
             {rows ?
-                <Box sx={{height: "80vh", width: '95vw', margin: 'auto', mt: 5}}>
+                <Box sx={{height: "80vh", width: '95vw', margin: 'auto', mt: 4}}>
                     {serversToDelete.length > 0 && <Button variant="contained" sx={{backgroundColor:"white" ,marginBottom:1}} onClick={handleDeleteServers}><DeleteForeverIcon color="error"/></Button>}
                     <DataGrid
                         rows={rows}
