@@ -8,6 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {columnsServer} from "../../common/datagrid/servers.ts";
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
 import Button from "@mui/material/Button";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 // La suppression est present de cette maniere pour le moment dans le but de simplifier le developpement et les tests
 
@@ -33,7 +34,7 @@ export const ServersConfig = () => {
         <>
             {rows ?
                 <Box sx={{height: "80vh", width: '95vw', margin: 'auto', mt: 5}}>
-                    {serversToDelete.length > 0 && <Button onClick={handleDeleteServers}>Delete</Button>}
+                    {serversToDelete.length > 0 && <Button variant="contained" sx={{backgroundColor:"white" ,marginBottom:1}} onClick={handleDeleteServers}><DeleteForeverIcon color="error"/></Button>}
                     <DataGrid
                         rows={rows}
                         columns={columnsServer}
