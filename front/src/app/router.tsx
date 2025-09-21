@@ -6,6 +6,7 @@ import {MainLayout} from "../pages/main-layout";
 import {AddServers} from "../pages/add-servers";
 import {Servers} from "../pages/servers";
 import {ServersConfig} from "../pages/servers-config";
+import {Tasks} from "../pages/tasks";
 
 export const router = createBrowserRouter([
     {
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
             {
                 path: "/add-servers",
                 element: <AddServers/>,
+            },
+            {
+                path: "/tasks",
+                element: <Tasks/>,
             },
         ],
     },
