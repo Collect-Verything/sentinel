@@ -4,12 +4,8 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import {Divider, ListItemIcon, ListItemText} from "@mui/material";
-import PermDataSettingIcon from '@mui/icons-material/PermDataSetting';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AddIcon from '@mui/icons-material/Add';
-import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
-import {LINKS} from "../../app/links.ts";
+import {ITEMS} from "./const.tsx";
+
 
 export const PositionedMenu = () => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -48,37 +44,21 @@ export const PositionedMenu = () => {
                     horizontal: 'left',
                 }}
             >
-                <MenuItem component="a" onClick={handleClose} href={LINKS.DASHBOARD}>
-                    <ListItemIcon>
-                        <DashboardIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Dashboard</ListItemText>
-                </MenuItem>
-                <MenuItem component="a" onClick={handleClose} href={LINKS.ADD_SERVERS}>
-                    <ListItemIcon>
-                        <AddIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Ajouter</ListItemText>
-                </MenuItem>
-                <MenuItem component="a" onClick={handleClose} href={LINKS.SERVERS}>
-                    <ListItemIcon>
-                        <ManageHistoryIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Gerer</ListItemText>
-                </MenuItem>
-                <Divider/>
-                <MenuItem component="a" onClick={handleClose} href={LINKS.SHOP}>
-                    <ListItemIcon>
-                        <StorefrontIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Boutique</ListItemText>
-                </MenuItem>
-                <MenuItem component="a" onClick={handleClose} href={LINKS.CONFIGURATOR}>
-                    <ListItemIcon>
-                        <PermDataSettingIcon fontSize="small"/>
-                    </ListItemIcon>
-                    <ListItemText>Configurateur</ListItemText>
-                </MenuItem>
+                {
+                    ITEMS.map(([href, Icon, label], index) => (
+                        <React.Fragment key={href}>
+                            {index === 1 && <Divider/>}
+                            {index === 4 && <Divider/>}
+                            <MenuItem component="a" onClick={handleClose} href={href}>
+                                <ListItemIcon>
+                                    <Icon fontSize="small"/>
+                                </ListItemIcon>
+                                <ListItemText primary={label}/>
+                            </MenuItem>
+                        </React.Fragment>
+                    ))
+                }
+
             </Menu>
         </>
     );
