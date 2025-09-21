@@ -39,3 +39,4 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 - [x] Generer config ressources et creer endpoint get all et end point config avec logique commenté 
 - [ ] Creer un web socket pour suivre la configuration en cours des serveur, donc petit onglet rabatable de suivi dans le front, du coup changer la logique de la dialog sur la response (...)
 - [ ] Gerer erreur a l'ajout des serveur avec precision, genre unique constraint key et ce genre de chose, mais en vrai pas urgent
+- [ ] Fusionner page servers et config-servers quand tout sera terminé
