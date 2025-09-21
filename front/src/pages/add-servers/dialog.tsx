@@ -4,7 +4,13 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import type {Dispatch, SetStateAction} from "react";
+import {type Dispatch, type SetStateAction, useEffect, useState} from "react";
+import {apiGet, apiPost} from "../../common/utils/web";
+import {CONFIGS_PATH} from "../../common/utils/web/const.ts";
+import type {Configs} from "../../common/types/backend";
+import MenuItem from "@mui/material/MenuItem";
+import Box from "@mui/material/Box";
+import {FormControl, InputLabel, Select, type SelectChangeEvent} from "@mui/material";
 
 interface DialogConfigServersProps {
     setOpenDialog: Dispatch<SetStateAction<boolean>>
@@ -13,11 +19,31 @@ interface DialogConfigServersProps {
     idsServerReadyToConfig: number[]
 }
 
+
 export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog, idsServerReadyToConfig}: DialogConfigServersProps) => {
+
+    const [configs, setConfigs] = useState<Configs[]>();
+    const [configSelected, setConfigSelected] = useState();
+    const [responseConfig, setResponseConfig] = useState(false);
 
     const handleClose = () => {
         setOpenDialog(false);
     };
+
+
+    const handleConfig = (event: SelectChangeEvent<typeof configSelected>) => {
+        // @ts-ignore
+        setConfigSelected(event.target.value,);
+    };
+
+
+    const handleLunchConfig = () => {
+        apiPost(`${CONFIGS_PATH}/lunch`, {configSelected: configSelected, listId: idsServerReadyToConfig}).then(() => setResponseConfig(true))
+    }
+
+    useEffect(() => {
+        apiGet(`${CONFIGS_PATH}`).then(setConfigs)
+    }, [])
 
     return (
         <>
@@ -40,9 +66,67 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                     <DialogContentText id="alert-dialog-description">
                         Selectionner la configuration necessaire à cette opération:
                     </DialogContentText>
+                    <Box
+                        noValidate
+                        component="form"
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            m: 'auto',
+                            width: 'fit-content',
+                        }}
+                    >
+                        <FormControl sx={{mt: 2, minWidth: 120}}>
+                            <InputLabel htmlFor="max-width">Config</InputLabel>
+                            <Select
+                                autoFocus
+                                value={configSelected}
+                                onChange={handleConfig}
+                                label="maxWidth"
+                                inputProps={{
+                                    name: 'max-width',
+                                    id: 'max-width',
+                                }}
+                            >
+                                {configs?.map((c) => <MenuItem value={c.id}>{c.name}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Box margin="auto" textAlign="center" mt={2}>
+                        {(configSelected && !responseConfig) && (
+                            <Button
+                                onClick={handleLunchConfig}
+                                variant="contained"
+                                sx={{
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    background: `linear-gradient(270deg,#4caf50, #ffeb3b, #f44336, #6a0dad, #0d47a1, #1de9b6, #c0c0c0, #ffd700, #ff69b4, #4caf50)`,
+                                    backgroundSize: "1800% 1800%",
+                                    animation: "galacticWave 30s ease infinite",
+                                    borderRadius: "12px",
+                                    boxShadow: "0 0 20px rgba(255, 255, 255, 0.3)",
+                                    "@keyframes galacticWave": {
+                                        "0%": {backgroundPosition: "0% 50%"},
+                                        "25%": {backgroundPosition: "50% 0%"},
+                                        "50%": {backgroundPosition: "100% 50%"},
+                                        "75%": {backgroundPosition: "50% 100%"},
+                                        "100%": {backgroundPosition: "0% 50%"}
+                                    },
+                                }}
+                            >
+                                🚀 Lancement des configurations 🌚
+                            </Button>
+
+                        )}
+                        {responseConfig && (<Button color="success" variant="contained">🍾 Configuration effectué avec succés</Button>)}
+                    </Box>
                 </DialogContent>
                 <DialogActions>
+                    {responseConfig ?
+                    <Button color="error" onClick={handleClose}>Fermer la fenetre</Button>
+                        :
                     <Button color="error" onClick={handleClose}>Annuler l'operation</Button>
+                    }
                 </DialogActions>
             </Dialog>
         </>
