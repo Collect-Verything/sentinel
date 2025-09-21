@@ -3,8 +3,23 @@ html, body, #root {
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
-    background: #0a0f1c;
+    background: linear-gradient(-45deg, #0a0f1c, #1c2b4b, #2b436b, #4a5f9a, #0f172a, #2c4375, #0a0f1c);
+    background-size: 400% 400%;
+    animation: gradientFlow 30s ease infinite;
     color: #f1f5f9;
+    height: 100%;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .home-container {
