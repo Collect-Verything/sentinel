@@ -1,34 +1,12 @@
 import React, {createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
 import {TASKS_PATH} from "../common/utils/web/const.ts";
-
-// --- Types ---
-export type TaskState = "queued" | "running" | "completed" | "failed" | "not_found" | "unknown";
-
-export interface TaskItem {
-    id: string;
-    state: TaskState;
-    error?: string;
-    seconds?: number;          // payload initial
-    createdAt: number;         // Date.now()
-    updatedAt: number;         // maj à chaque poll
-}
-
-type State = {
-    tasks: TaskItem[];
-    loading: boolean;
-    error?: string;
-    panel: boolean;
-};
-
-type Action =
-    | { type: "UPSERT"; payload: TaskItem }
-    | { type: "SET_LOADING"; payload: boolean }
-    | { type: "SET_ERROR"; payload?: string }
-    | { type: "REMOVE"; payload: { id: string } }
-    | { type: "CLEAR_COMPLETED" }
-    | { type: "SET_PANEL"; payload: boolean }
+import type {Action, State, TaskItem, TaskState} from "./types.ts";
 
 const initial: State = {tasks: [], loading: false, panel: false};
+
+// Utils
+const isTerminal = (s?: TaskState, err?: string) =>
+    s === "completed" || s === "failed" || err === "not_found";
 
 // --- Reducer ---
 function reducer(state: State, action: Action): State {
@@ -38,6 +16,14 @@ function reducer(state: State, action: Action): State {
             const tasks = exists
                 ? state.tasks.map(t => (t.id === action.payload.id ? action.payload : t))
                 : [action.payload, ...state.tasks];
+            return {...state, tasks};
+        }
+        case "PATCH": {
+            const idx = state.tasks.findIndex(t => t.id === action.payload.id);
+            if (idx === -1) return state;
+            const next = {...state.tasks[idx], ...action.payload.patch};
+            const tasks = [...state.tasks];
+            tasks[idx] = next;
             return {...state, tasks};
         }
         case "REMOVE":
@@ -61,30 +47,37 @@ type Ctx = State & {
     removeTask: (id: string) => void;
     clearCompleted: () => void;
     getTask: (id: string) => TaskItem | undefined;
-
     setPanel: (open: boolean) => void;
 };
 
 const TasksContext = createContext<Ctx | null>(null);
 
-// util : considère ces états comme terminaux
-const isTerminal = (s: TaskState, err?: string) =>
-    s === "completed" || s === "failed" || err === "not_found";
-
 // --- Provider ---
 export function TasksProvider({children}: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(reducer, initial);
 
-    // ---- Panel controls
+    // ---- Panel controls => API unique
     const setPanel = useCallback((open: boolean) => {
-        dispatch({ type: "SET_PANEL", payload: open });
+        dispatch({type: "SET_PANEL", payload: open});
     }, []);
 
-
-    // stocke les setInterval actifs par id
+    // stock setInterval actifs par id
     const pollers = useRef<Map<string, number>>(new Map());
+    const stopPoller = (id: string) => {
+        const intId = pollers.current.get(id);
+        if (intId) {
+            clearInterval(intId);
+            pollers.current.delete(id);
+        }
+    };
 
-    // nettoyage global si le provider se démonte
+    // ref vers liste courante pour éviter closures obsoletes
+    const tasksRef = useRef<TaskItem[]>([]);
+    useEffect(() => {
+        tasksRef.current = state.tasks;
+    }, [state.tasks]);
+
+    // cleab global si provider démonte
     useEffect(() => {
         return () => {
             pollers.current.forEach((intId) => clearInterval(intId));
@@ -92,38 +85,41 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         };
     }, []);
 
-    async function pollStatus(id: string) {
+    // --- Poll status (ciao si deja terminé)
+    const pollStatus = useCallback(async (id: string) => {
+        const current = tasksRef.current.find(t => t.id === id);
+        if (!current) return;
+
+        if (isTerminal(current.state, current.error)) {
+            stopPoller(id);
+            return;
+        }
+
         try {
             const res = await fetch(`http://localhost:3001/${TASKS_PATH}/status/${id}`);
             const data = await res.json() as { state?: TaskState; error?: string };
-            const next: TaskItem | undefined = state.tasks.find(t => t.id === id)
-                ? {
-                    ...(state.tasks.find(t => t.id === id)!),
-                    state: (data.state ?? "unknown"),
-                    error: data.error,
-                    updatedAt: Date.now(),
-                }
-                : undefined;
 
-            if (next) dispatch({type: "UPSERT", payload: next});
+            // merge minimal sans lire state
+            dispatch({
+                type: "PATCH",
+                payload: {
+                    id,
+                    patch: {
+                        state: data.state ?? current.state,
+                        error: data.error,
+                        updatedAt: Date.now(),
+                    },
+                },
+            });
 
-            if (isTerminal(next?.state ?? "unknown", next?.error)) {
-                const intId = pollers.current.get(id);
-                if (intId) {
-                    clearInterval(intId);
-                    pollers.current.delete(id);
-                }
+            if (isTerminal(data.state, data.error)) {
+                stopPoller(id);
             }
         } catch (e) {
-            // en cas d’erreur réseau, on garde l’item mais on arrête le poll
-            const intId = pollers.current.get(id);
-            if (intId) {
-                clearInterval(intId);
-                pollers.current.delete(id);
-            }
+            stopPoller(id);
             dispatch({type: "SET_ERROR", payload: "Polling error"});
         }
-    }
+    }, [TASKS_PATH]);
 
     async function startTask(seconds: number = 20): Promise<string | undefined> {
         dispatch({type: "SET_LOADING", payload: true});
@@ -133,20 +129,23 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({seconds}),
             });
-            const {id} = await res.json() as { id: string };
+            const {id} = (await res.json()) as { id: string };
 
-            // crée/insère la tâche locale
+            // crée/insere tâche locale
             const now = Date.now();
             dispatch({
                 type: "UPSERT",
                 payload: {id, state: "queued", seconds, createdAt: now, updatedAt: now},
             });
 
-            // lance un poll toutes les 1s
+            // (A voire ...) possibilité d'ouvrir panel quand tache start
+            // setPanel(true);
+
+            // lance poll tout les 1s
             const intId = window.setInterval(() => pollStatus(id), 1000);
             pollers.current.set(id, intId);
 
-            // premier poll immédiat
+            // premier poll direct
             pollStatus(id);
 
             return id;
@@ -159,25 +158,15 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
     }
 
     function removeTask(id: string) {
-        const intId = pollers.current.get(id);
-        if (intId) {
-            clearInterval(intId);
-            pollers.current.delete(id);
-        }
+        stopPoller(id);
         dispatch({type: "REMOVE", payload: {id}});
     }
 
     function clearCompleted() {
-        // stoppe aussi les pollers éventuels (sécurité)
+        // stopper pollers éventuel par sécu
         state.tasks
             .filter(t => t.state === "completed")
-            .forEach(t => {
-                const intId = pollers.current.get(t.id);
-                if (intId) {
-                    clearInterval(intId);
-                    pollers.current.delete(t.id);
-                }
-            });
+            .forEach(t => stopPoller(t.id));
         dispatch({type: "CLEAR_COMPLETED"});
     }
 
@@ -193,7 +182,9 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
             clearCompleted,
             getTask,
             setPanel,
-        }), [state, startTask, removeTask, clearCompleted, getTask, setPanel]);
+        }),
+        [state, startTask, removeTask, clearCompleted, getTask, setPanel]
+    );
 
     return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
 }
@@ -204,6 +195,3 @@ export function useTasks() {
     if (!ctx) throw new Error("useTasks must be used within <TasksProvider>");
     return ctx;
 }
-
-
-

@@ -62,8 +62,7 @@ export const AddServers = () => {
                     id="csv-upload"
                     accept=".csv"
                     className="file-input"
-                    onChange={(e) => handleFile(e)
-                    }
+                    onChange={(e) => handleFile(e)}
                 />
 
                 <Grid className="info-bubble" container direction="column">

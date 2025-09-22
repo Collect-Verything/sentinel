@@ -10,8 +10,9 @@ import {CONFIGS_PATH} from "../../common/utils/web/const.ts";
 import type {Configs} from "../../common/types/backend";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
-import {FormControl, InputLabel, Select, type SelectChangeEvent} from "@mui/material";
+import {FormControl, Grid, InputLabel, Select, type SelectChangeEvent} from "@mui/material";
 import {useTasks} from "../../contexts/TasksContext.tsx";
+import Typography from "@mui/material/Typography";
 
 interface DialogConfigServersProps {
     setOpenDialog: Dispatch<SetStateAction<boolean>>
@@ -27,13 +28,22 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
     const [configs, setConfigs] = useState<Configs[]>();
     const [configSelected, setConfigSelected] = useState();
     const [responseConfig, setResponseConfig] = useState(false);
-    const [switchTasksPanel, setSwitchTasksPanel] = useState<boolean>(false);
+    const [switchTasksPanel, setSwitchTasksPanel] = useState(false);
 
-    const handleClose = (toConsultTaskPane: boolean) => {
+    const handleClose = (toConsultTaskPane = false) => {
         setOpenDialog(false);
         if (toConsultTaskPane) {
             setPanel(true)
+            setConfigSelected(undefined)
+            setResponseConfig(false)
+            setSwitchTasksPanel(false)
         }
+        // TODO:
+        // if (refreshPage) {
+        // window.location.reload()
+        // Reload n'est pas possible, car le state n'est pas persisdté, donc tous les elements propre a la session, disparaissent pour le mommebt.
+        // Il faut donc persisiter le state en local storage par exemple pour pouvoir refresh la page sans perdre les tache en cours attaché au user, et le reste biensur(auth...)
+        // }
     };
 
 
@@ -41,7 +51,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
         // @ts-ignore
         setConfigSelected(event.target.value,);
     };
-
 
     const handleLunchConfig = () => {
         console.log('typeof startTask =', typeof startTask);
@@ -54,6 +63,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
         }).catch(console.error);
     }
 
+
     useEffect(() => {
         apiGet(`${CONFIGS_PATH}`).then(setConfigs)
     }, [])
@@ -65,7 +75,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
             </button>
             <Dialog
                 open={openDialog}
-                onClose={handleClose}
+                onClose={() => handleClose()}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
@@ -81,7 +91,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                             <DialogContentText id="alert-dialog-description">
                                 Selectionner la configuration necessaire à cette opération:
                             </DialogContentText>
-
                             <Box
                                 noValidate
                                 component="form"
@@ -92,7 +101,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                                     width: 'fit-content',
                                 }}
                             >
-
                                 <FormControl sx={{mt: 2, minWidth: 120}}>
                                     <InputLabel htmlFor="max-width">Config</InputLabel>
                                     <Select
@@ -134,7 +142,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                                         🚀 Lancement des configurations 🌚
                                     </Button>
                                 )}
-                                {responseConfig && (<Button color="success" variant="contained">🍾 Configuration effectué avec succés</Button>)}
                             </Box>
                         </DialogContent>
                     </>
@@ -143,9 +150,13 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
 
                     {responseConfig ?
                         <DialogContent>
-                            <Button onClick={() => handleClose(true)}>Consulter la tache </Button>
-
-                            <Button color="error" onClick={() => handleClose(false)}>Fermer la fenetre</Button>
+                            <Typography m={5} textAlign="center">🍾 Configuration des serveurs effectué avec succés 🍾</Typography>
+                            <Grid margin="auto" textAlign="center">
+                                <Button onClick={() => handleClose(true)}>Consulter la tache </Button>
+                                <Button color="error" onClick={() => {
+                                    handleClose(false)
+                                }}>Fermer la fenetre</Button>
+                            </Grid>
                         </DialogContent>
                         :
                         <Button color="error" onClick={() => handleClose(false)}>Annuler l'operation</Button>
