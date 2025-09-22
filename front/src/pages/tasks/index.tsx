@@ -30,14 +30,13 @@
 // };
 
 import "./index.css"
-import {Fab} from "@mui/material";
+import {Fab, Grid} from "@mui/material";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as React from "react";
 import {useState} from "react";
 import type {TransitionProps} from "@mui/material/transitions";
 import Dialog from '@mui/material/Dialog';
-import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -47,6 +46,8 @@ import IconButton from '@mui/material/IconButton';
 import Slide from '@mui/material/Slide';
 import Typography from "@mui/material/Typography";
 import {useTasks} from "../../contexts/TasksContext.tsx";
+import CloseIcon from '@mui/icons-material/Close';
+import Button from "@mui/material/Button";
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -58,18 +59,18 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export const Tasks = () => {
-    const { tasks, removeTask, clearCompleted } = useTasks();
+    const {tasks, removeTask, clearCompleted,panel,setPanel} = useTasks();
 
     const [windowButton, setWindowButton] = useState(false);
-    const [open, setOpen] = React.useState(false);
+    // const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
-        setOpen(true);
+        setPanel(true);
         setWindowButton(!windowButton)
     };
 
     const handleClose = () => {
-        setOpen(false);
+        setPanel(false);
         setWindowButton(!windowButton)
     };
 
@@ -94,7 +95,7 @@ export const Tasks = () => {
             </Fab>
             <Dialog
                 fullWidth
-                open={open}
+                open={panel}
                 onClose={handleClose}
                 slots={{
                     transition: Transition,
@@ -125,24 +126,32 @@ export const Tasks = () => {
                     {/*    />*/}
                     {/*</ListItemButton>*/}
                     <div>
-                        <button onClick={clearCompleted}>Nettoyer terminées</button>
 
-                        <ul>
-                            {tasks && tasks.map((t) => (
-                                <li key={t.id} style={{ margin: "8px 0" }}>
-                                    <code>{t.id}</code> — <strong>{t.state}</strong>
-                                    {t.error ? <> — <span style={{ color: "tomato" }}>{t.error}</span></> : null}
-                                    {t.seconds ? <> — {t.seconds}s</> : null}
-                                    <button onClick={() => removeTask(t.id)} style={{ marginLeft: 8 }}>
-                                        supprimer
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+                        <Divider/>
+                        {tasks && tasks.map((t) => (
+                            <>
+                                <ListItemButton>
+                                    Tâche : n°<code>{t.id}</code> — Etat : <strong>{t.state}</strong>
+                                    {t.error ? <> — <span style={{color: "tomato"}}>{t.error}</span></> : null}
+                                    {t.seconds ? <> Temp restant : — {t.seconds}s</> : null}
+                                    <Button onClick={() => removeTask(t.id)}>
+                                        <CloseIcon color="error"/>
+                                    </Button>
+                                </ListItemButton>
+                                <Divider/>
+                            </>
+
+                        ))}
+                        <Grid textAlign="center" margin={2}>
+
+                            <button onClick={clearCompleted}>Nettoyer les tâches</button>
+                        </Grid>
                     </div>
                 </List>
             </Dialog>
         </>
     );
 };
+
+
 

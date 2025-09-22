@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
+import React, {createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
 import {TASKS_PATH} from "../common/utils/web/const.ts";
 
 // --- Types ---
@@ -17,6 +17,7 @@ type State = {
     tasks: TaskItem[];
     loading: boolean;
     error?: string;
+    panel: boolean;
 };
 
 type Action =
@@ -24,9 +25,10 @@ type Action =
     | { type: "SET_LOADING"; payload: boolean }
     | { type: "SET_ERROR"; payload?: string }
     | { type: "REMOVE"; payload: { id: string } }
-    | { type: "CLEAR_COMPLETED" };
+    | { type: "CLEAR_COMPLETED" }
+    | { type: "SET_PANEL"; payload: boolean }
 
-const initial: State = {tasks: [], loading: false};
+const initial: State = {tasks: [], loading: false, panel: false};
 
 // --- Reducer ---
 function reducer(state: State, action: Action): State {
@@ -46,6 +48,8 @@ function reducer(state: State, action: Action): State {
             return {...state, loading: action.payload};
         case "SET_ERROR":
             return {...state, error: action.payload};
+        case "SET_PANEL":
+            return {...state, panel: action.payload};
         default:
             return state;
     }
@@ -57,6 +61,8 @@ type Ctx = State & {
     removeTask: (id: string) => void;
     clearCompleted: () => void;
     getTask: (id: string) => TaskItem | undefined;
+
+    setPanel: (open: boolean) => void;
 };
 
 const TasksContext = createContext<Ctx | null>(null);
@@ -68,6 +74,12 @@ const isTerminal = (s: TaskState, err?: string) =>
 // --- Provider ---
 export function TasksProvider({children}: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(reducer, initial);
+
+    // ---- Panel controls
+    const setPanel = useCallback((open: boolean) => {
+        dispatch({ type: "SET_PANEL", payload: open });
+    }, []);
+
 
     // stocke les setInterval actifs par id
     const pollers = useRef<Map<string, number>>(new Map());
@@ -180,9 +192,8 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
             removeTask,
             clearCompleted,
             getTask,
-        }),
-        [state]
-    );
+            setPanel,
+        }), [state, startTask, removeTask, clearCompleted, getTask, setPanel]);
 
     return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
 }
