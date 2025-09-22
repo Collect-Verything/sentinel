@@ -4,7 +4,7 @@ import {LINKS} from "../../app/links.ts";
 
 export const Home = () => {
     return (
-        <Grid mt={-5} className="home-container">
+        <Grid mt={-10} className="home-container">
             <header className="hero" >
                 <h1 className="hero-title">Bienvenue sur Sentinel</h1>
                 <p className="hero-subtitle">
