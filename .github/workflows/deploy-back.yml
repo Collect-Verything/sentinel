@@ -127,6 +127,36 @@ jobs:
 
             RUNTIME_DATABASE_URL="mysql://$MYSQL_USER:$MYSQL_PASSWORD@mysql-prod:3306/$MYSQL_DATABASE"
 
+            # ===== Redis =====
+            echo "==> Ensure single Redis container named 'redis-prod'"
+            REDIS_HOST="redis-prod"
+            if docker ps -a --format '{{.Names}}' | grep -qx "redis-prod"; then
+              echo "   - Found redis-prod (OK)"
+              docker network connect "$NET" redis-prod >/dev/null 2>&1 || true
+              docker start redis-prod >/dev/null 2>&1 || true
+            else
+              echo "   - No Redis found, creating 'redis-prod'..."
+              docker run -d \
+                --name redis-prod \
+                --restart unless-stopped \
+                --network "$NET" \
+                -e TZ="Europe/Paris" \
+                -v redis-prod-data:/data \
+                redis:7 \
+                redis-server --appendonly yes
+            fi
+
+            echo "==> Wait for Redis (redis-prod) to be ready"
+            for i in $(seq 1 60); do
+              if docker exec redis-prod sh -lc "redis-cli ping" 2>/dev/null | grep -qx PONG; then
+                echo "   - Redis is ready"
+                break
+              fi
+              sleep 2
+            done
+
+            RUNTIME_REDIS_URL="redis://$REDIS_HOST:6379"
+
             echo '==> Replace API container'
             if docker ps -a --format '{{.Names}}' | grep -qx "$APP"; then
               docker stop "$APP" >/dev/null 2>&1 || true
@@ -140,6 +170,7 @@ jobs:
               -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
               -e NODE_ENV=production \
               -e DATABASE_URL="$RUNTIME_DATABASE_URL" \
+              -e REDIS_URL="$RUNTIME_REDIS_URL" \  # <-- (NOUVEAU) injecte REDIS_URL
               "$IMAGE"
 
             echo "==> Healthcheck API"
