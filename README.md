@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=pQ0db2ERil8" target="blank"><img src="pic/img.png" width="420" alt="Sentinel Logo" /></a href="https://www.youtube.com/watch?v=pQ0db2ERil8" target="blank">
+</p>
+
 # Sentinel – Monitoring, Tasks & Ops
 
 ## 📌 Introduction
