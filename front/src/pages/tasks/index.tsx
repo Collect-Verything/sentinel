@@ -1,34 +1,3 @@
-// import { TASKS_PATH } from "../../common/utils/web/const";
-//
-// export const Tasks = () => {
-//     async function startTask() {
-//         const res = await fetch(`http://localhost:3001/${TASKS_PATH}/enqueue`, {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ seconds: 20 }),
-//         });
-//         const { id } = await res.json();
-//
-//         const interval = setInterval(async () => {
-//             const s = await fetch(`http://localhost:3001/${TASKS_PATH}/status/${id}`)
-//                 .then(r => r.json());
-//
-//             console.log('status', s);
-//
-//             if (s.state === 'completed' || s.state === 'failed' || s.error === 'not_found') {
-//                 clearInterval(interval);
-//             }
-//         }, 1000);
-//     }
-//
-//     return (
-//         <>
-//             <p>Task page</p>
-//             <button onClick={startTask}>Lancer la tâche</button>
-//         </>
-//     );
-// };
-
 import "./index.css"
 import {Fab, Grid} from "@mui/material";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -62,7 +31,6 @@ export const Tasks = () => {
     const {tasks, removeTask, clearCompleted,panel,setPanel} = useTasks();
 
     const [windowButton, setWindowButton] = useState(false);
-    // const [open, setOpen] = React.useState(false);
 
     const handleClickOpen = () => {
         setPanel(true);
@@ -75,17 +43,6 @@ export const Tasks = () => {
     };
 
     return (
-        // <Fab size="small" aria-label="add" sx={{
-        //     position: 'absolute', bottom: 16,
-        //     right: 16,
-        // }}>
-        //     {windowButton ?
-        //         <ExpandMoreIcon onClick={() => setWindowButton(!windowButton)}/>
-        //         :
-        //         <ExpandLessIcon onClick={() => setWindowButton(!windowButton)}/>
-        //     }
-        // </Fab>
-
         <>
             <Fab size="small" aria-label="add" sx={{
                 position: 'absolute', bottom: 16,
@@ -115,16 +72,6 @@ export const Tasks = () => {
                     </Toolbar>
                 </AppBar>
                 <List>
-                    {/*<ListItemButton>*/}
-                    {/*    <ListItemText primary="Phone ringtone" secondary="Titania"/>*/}
-                    {/*</ListItemButton>*/}
-                    {/*<Divider/>*/}
-                    {/*<ListItemButton>*/}
-                    {/*    <ListItemText*/}
-                    {/*        primary="Default notification ringtone"*/}
-                    {/*        secondary="Tethys"*/}
-                    {/*    />*/}
-                    {/*</ListItemButton>*/}
                     <div>
 
                         <Divider/>

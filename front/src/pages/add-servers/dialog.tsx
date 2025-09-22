@@ -52,7 +52,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
                 setResponseConfig(true)
             }
         }).catch(console.error);
-        // apiPost(`${CONFIGS_PATH}/lunch`, {configSelected: configSelected, listId: idsServerReadyToConfig}).then(() => setResponseConfig(true))
     }
 
     useEffect(() => {
