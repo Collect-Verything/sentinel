@@ -170,7 +170,7 @@ jobs:
               -p "${EXTERNAL_PORT}:${INTERNAL_PORT}" \
               -e NODE_ENV=production \
               -e DATABASE_URL="$RUNTIME_DATABASE_URL" \
-              -e REDIS_URL="$RUNTIME_REDIS_URL" \  # <-- (NOUVEAU) injecte REDIS_URL
+              -e REDIS_URL="$RUNTIME_REDIS_URL" \ 
               "$IMAGE"
 
             echo "==> Healthcheck API"
