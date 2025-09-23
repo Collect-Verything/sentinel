@@ -1,5 +1,5 @@
 import React, {createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
-import {TASKS_PATH} from "../common/utils/web/const.ts";
+import {API_BASE, TASKS_PATH} from "../common/utils/web/const.ts";
 import type {Action, State, TaskItem, TaskState} from "./types.ts";
 
 const initial: State = {tasks: [], loading: false, panel: false};
@@ -96,7 +96,7 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         }
 
         try {
-            const res = await fetch(`http://${process.env.VITE_API_BASE}:3001/${TASKS_PATH}/status/${id}`);
+            const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/status/${id}`);
             const data = await res.json() as { state?: TaskState; error?: string };
 
             // merge minimal sans lire state
@@ -124,7 +124,7 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
     async function startTask(seconds: number = 20): Promise<string | undefined> {
         dispatch({type: "SET_LOADING", payload: true});
         try {
-            const res = await fetch(`http://${process.env.VITE_API_BASE}:3001/${TASKS_PATH}/enqueue`, {
+            const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/enqueue`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({seconds}),
