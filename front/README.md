@@ -47,18 +47,43 @@ Elle permet de piloter l’infra (serveurs, configurations, tâches) et d’acc�
 
 ## ⚙️ Variables d’environnement
 
-Aucune n’est nécessaire **pour le moment** côté front.
+Deux fichiers d’environnement peuvent être utilisés côté **front** (Vite) : un pour le **dev** et un pour la **prod**.
 
-> Optionnel (si besoin plus tard) :
->
-> ```env
-> VITE_API_BASE_URL=http://localhost:3001
-> VITE_GRAFANA_URL=http://localhost:3000
-> VITE_PROMETHEUS_URL=http://localhost:9090
-> VITE_LOKI_URL=http://localhost:3100
-> ```
->
-> (Injectées via `.env.local` en dev ou par l’orchestrateur en prod.)
+> Rappel : seules les variables préfixées par `VITE_` sont exposées au code client.
+
+### `.env.development` (dev local)
+
+```env
+# Hôte du backend en dev
+VITE_API_BASE=localhost
+```
+
+### `.env.production` (prod)
+
+> En prod, la valeur est **injectée par l’orchestrateur** (Docker / GitHub Actions / Variables).
+
+Exemple dans le workflow :
+
+```yaml
+- name: Create .env.production
+  working-directory: ./front
+  run: |
+    echo "VITE_API_BASE=${{ vars.SSH_HOST }}" > .env.production
+```
+
+> Pour **simuler la prod en local**, laisse `localhost` ou mets l’IP locale de test.
+
+```env
+VITE_API_BASE=localhost
+# ou
+# VITE_API_BASE=192.168.1.50
+```
+
+**Notes**
+
+* Le **schéma/port HTTP** est **codé en dur** côté front pour l’instant (`:3001`).
+  Si tu veux le rendre configurable, passe à une URL complète (ex. `VITE_API_BASE=http://host:3001`) et utilise-la telle quelle dans les `fetch()`.
+
 
 ---
 
