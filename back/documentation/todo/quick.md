@@ -49,3 +49,9 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 - [x] Creerr un context tasks pour declancher la tache dans une page puis la suivre dans la fenetre glissante
 - [x] Integrer ansible à la logique du service fictif
 - [x] Trouver un moyen grace au log d'afficher une bar de progression de la tache suvi par l'utilisateur
+
+
+# 23-09-2025
+
+      
+- [ ] Fix - '!back/documentation/**' to ignore docuemnation in action 

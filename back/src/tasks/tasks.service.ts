@@ -9,6 +9,7 @@ type TaskResult = { message: string; elapsedMs: number };
 const QUEUE_NAME = 'sentinel-tasks';
 const BULL_PREFIX = 'sentinel';
 
+
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
     private queue!: Queue<TaskPayload, TaskResult, string>;
