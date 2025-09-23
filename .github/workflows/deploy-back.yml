@@ -6,8 +6,7 @@ on:
     paths:
       - "back/**"
       - ".github/workflows/deploy-back.yml"
-    paths-ignore:
-      - 'back/documentation/**'
+      - '!back/documentation/**'
 
   workflow_dispatch: {}
 
