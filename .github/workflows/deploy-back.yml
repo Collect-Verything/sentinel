@@ -5,8 +5,8 @@ on:
     branches: [ main ]
     paths:
       - "back/**"
-      - ".github/workflows/deploy-back.yml"
       - '!back/documentation/**'
+      - ".github/workflows/deploy-back.yml"
 
   workflow_dispatch: {}
 
