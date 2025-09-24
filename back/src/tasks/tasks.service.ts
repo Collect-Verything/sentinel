@@ -1,32 +1,27 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Queue, Worker, QueueEvents, JobsOptions } from 'bullmq';
-import IORedis, { RedisOptions } from 'ioredis';
-
-type TaskPayload = { seconds: number };
-type TaskProgress = { step: number; total: number; info?: string };
-type TaskResult = { message: string; elapsedMs: number };
-
-const QUEUE_NAME = 'sentinel-tasks';
-const BULL_PREFIX = 'sentinel';
+import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
+import { Queue, QueueEvents, Worker as BullWorker} from 'bullmq';
+import type { JobsOptions } from 'bullmq';
+import IORedis from 'ioredis';
+import type {TaskPayload, TaskProgress, TaskResult} from './tasks.tool';
+import {BULL_PREFIX, getRedisConfig, processLongTask, QUEUE_NAME, quitOrDisconnect, registerWorkerListeners, safeClose} from "./tasks.tool";
 
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
-    private queue!: Queue<TaskPayload, TaskResult, string>;
-    private worker!: Worker<TaskPayload, TaskResult, string>;
-    private events!: QueueEvents;
-    private redisMain!: IORedis;
-    private redisEvents!: IORedis;
+    private readonly queue: Queue<TaskPayload, TaskResult, string>;
+    private readonly events: QueueEvents;
+    private readonly redisMain: IORedis;
+    private readonly redisEvents: IORedis;
+    private worker: BullWorker<TaskPayload, TaskResult, string> | null = null;
 
 
     constructor() {
-        const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379/0';
-        const redisOpts: RedisOptions = { maxRetriesPerRequest: null as unknown as number, enableReadyCheck: false };
+        const {redisUrl, redisOpts} = getRedisConfig();
 
         this.redisMain = new IORedis(redisUrl, redisOpts);
         this.redisEvents = new IORedis(redisUrl, redisOpts);
 
-        this.queue = new Queue<TaskPayload, TaskResult>(QUEUE_NAME, {
+        this.queue = new Queue<TaskPayload, TaskResult, string>(QUEUE_NAME, {
             connection: this.redisMain,
             prefix: BULL_PREFIX,
         });
@@ -37,65 +32,99 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         });
     }
 
+    /**
+     * Initialise la chaîne BullMQ :
+     *  1) Attend la readiness de QueueEvents et Queue en parallèle (logs d’erreur si KO).
+     *  2) Crée le Worker avec processor dédié et concurrence configurée.
+     *  3) Attend la readiness du Worker (exception si KO).
+     *  4) Enregistre les listeners d’observabilité (worker + events).
+     */
     async onModuleInit() {
-        await this.events.waitUntilReady();
-        await this.queue.waitUntilReady();
+        try {
+            await Promise.all([
+                this.events.waitUntilReady(),
+                this.queue.waitUntilReady(),
+            ]);
+        } catch (e) {
+            console.error('[tasks] BullMQ not ready:', (e as Error)?.message);
+            throw e;
+        }
 
-        this.worker = new Worker<TaskPayload, TaskResult>(
+
+        this.worker = new BullWorker<TaskPayload, TaskResult, string>(
             QUEUE_NAME,
-            async (job) => {
-                const total = Math.max(1, Math.floor(job.data.seconds ?? 20));
-                const start = Date.now();
-                for (let i = 1; i <= total; i++) {
-                    await new Promise((r) => setTimeout(r, 1000));
-                    await job.updateProgress({ step: i, total, info: `tick ${i}/${total}` });
-                }
-                return { message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start };
-            },
-            { connection: this.redisMain, prefix: BULL_PREFIX, concurrency: 3 },
+            (job) => processLongTask(job),
+            {connection: this.redisMain, prefix: BULL_PREFIX, concurrency: 3},
         );
 
-        await this.worker.waitUntilReady().catch(() => void 0);
+        const worker = this.worker;
+        if (!worker) throw new Error('Worker not initialized');
+        await worker.waitUntilReady();
+        registerWorkerListeners<TaskPayload, TaskResult, string>(worker, this.events);
 
-        this.worker.on('failed', (job, err) => {
-            console.error(`[worker] job ${job?.id} failed:`, err?.message);
-        });
     }
 
+    /**
+     * Arrête proprement le worker, les events, la queue, puis les connexions Redis.
+     * Utilise Promise.allSettled pour paralléliser sans interrompre le shutdown complet.
+     */
     async onModuleDestroy() {
-        try { await this.worker?.close(); } catch {}
-        try { await this.events?.close(); } catch {}
-        try { await this.queue?.close(); } catch {}
-        try { await this.redisEvents?.quit(); } catch {}
-        try { await this.redisMain?.quit(); } catch {}
+        await safeClose('worker.close', this.worker?.close());
+
+        await Promise.allSettled([
+            safeClose('events.close', this.events?.close()),
+            safeClose('queue.close', this.queue?.close()),
+        ]);
+
+        await Promise.allSettled([
+            quitOrDisconnect('redisEvents', this.redisEvents),
+            quitOrDisconnect('redisMain', this.redisMain),
+        ]);
     }
 
-    async enqueue(seconds = 20) {
-        await this.queue.waitUntilReady().catch(() => void 0);
+    async enqueue(seconds = 20, idempotencyKey?: string) {
+        try {
+            await this.queue.waitUntilReady();
+        } catch (e) {
+            console.error('[enqueue] queue not ready:', (e as Error)?.message);
+            throw e;
+        }
+
         const opts: JobsOptions = {
-            attempts: 1,
-            removeOnComplete: { age: 3600, count: 100 },
-            removeOnFail: { age: 3600, count: 100 },
+            attempts: 3,
+            backoff: {type: 'exponential', delay: 1000},
+            removeOnComplete: {age: 3600, count: 100},
+            removeOnFail: {age: 3600, count: 100},
+            jobId: idempotencyKey
         };
-        const job = await this.queue.add('longTask', { seconds }, opts);
+
+        const job = await this.queue.add('longTask', {seconds}, opts);
         console.log('[enqueue] created job id=', job.id);
-        return { id: String(job.id) };
+        return {id: String(job.id)};
     }
 
     /** Etat du job*/
     async getStatus(id: string) {
-        if (!id) return { error: 'not_found' as const, id };
+        if (!id) return {error: 'not_found' as const, id};
 
-        let job = await this.queue.getJob(id);
-        if (!job && /^\d+$/.test(id)) job = await this.queue.getJob(String(Number(id)));
-        if (!job) return { error: 'not_found' as const, id };
+        let job = await this.queue.getJob(id) ?? (/^\d+$/.test(id) ? await this.queue.getJob(String(Number(id))) : null);
+        if (!job) return {error: 'not_found' as const, id};
 
         const state = await job.getState();
         const progress = job.progress as TaskProgress | number;
-        const result = state === 'completed' ? job.returnvalue : undefined;
+        const result = state === 'completed' ? (job.returnvalue as TaskResult) : undefined;
         const failedReason = state === 'failed' ? job.failedReason : undefined;
 
-        return { id: job.id, state, progress, result, failedReason };
+        return {
+            id: String(job.id),
+            state,
+            progress,
+            result,
+            failedReason,
+            queuedAt: job.timestamp,
+            startedAt: job.processedOn ?? null,
+            finishedAt: job.finishedOn ?? null,
+        };
     }
 
     //  debug
@@ -121,4 +150,5 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             failed: failed.map(j => j.id),
         };
     }
+
 }
