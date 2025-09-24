@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=guS1Bc6QPGI" target="blank"><img src="pic/img_1.png" width="420" alt="Matrice Logo" /></a href="https://www.youtube.com/watch?v=guS1Bc6QPGI" target="blank">
+  <a href="https://www.youtube.com/watch?v=guS1Bc6QPGI" target="blank"><img src="../pic/img_1.png" width="420" alt="Matrice Logo" /></a href="https://www.youtube.com/watch?v=guS1Bc6QPGI" target="blank">
 </p>
 
 # 🚀 Sentinel Front — React (Vite + TS)

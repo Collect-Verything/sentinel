@@ -55,3 +55,4 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 
       
 - [ ] Fix - '!back/documentation/**' to ignore docuemnation in action 
+- [ ] Upgrade tasks service, et placer un update sur les serveur persisté, lancé dans la tache, en configured, une fois la tache terminé

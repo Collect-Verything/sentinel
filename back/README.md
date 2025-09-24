@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=ioIg4kDLMZQ" target="blank"><img src="pic/img_2.png" width="420" alt="Backend matrice Logo" /></a href="https://www.youtube.com/watch?v=ioIg4kDLMZQ" target="blank">
+  <a href="https://www.youtube.com/watch?v=ioIg4kDLMZQ" target="blank"><img src="../pic/img_2.png" width="420" alt="Backend matrice Logo" /></a href="https://www.youtube.com/watch?v=ioIg4kDLMZQ" target="blank">
 </p>
 
 
