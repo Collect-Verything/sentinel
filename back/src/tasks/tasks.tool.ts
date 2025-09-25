@@ -1,6 +1,6 @@
 import type IORedis from 'ioredis';
 import {RedisOptions} from "ioredis";
-import type {Job, QueueEvents, Worker as BullWorker} from 'bullmq';
+import type {QueueEvents, Worker as BullWorker} from 'bullmq';
 
 export type TaskPayload = { listIdServer: number[]; delayMs?: number };
 export type TaskProgress = { step: number; total: number; info?: string };
@@ -17,28 +17,6 @@ export const getRedisConfig = () => {
     };
     return {redisUrl, redisOpts};
 }
-
-/**
- * Processor des tâches longues (tick chaque seconde et met à jour la progression).
- * Séparé pour testabilité et lisibilité.
- */
-// export async function processLongTask(job: Job<TaskPayload, TaskResult, string>): Promise<TaskResult> {
-//     const ids = job.data.listIdServer ?? [];
-//     const total = Math.max(1, ids.length || 1);
-//     const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
-//     const start = Date.now();
-//
-//     for (let i = 0; i < total; i++) {
-//         const currentId = ids[i];
-//         await new Promise((r) => setTimeout(r, delayMs));
-//         await job.updateProgress({
-//             step: i + 1,
-//             total,
-//             info: currentId != null ? `server ${currentId} (${i + 1}/${total})` : `tick ${i + 1}/${total}`,
-//         });
-//     }
-//     return { message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start };
-// }
 
 /**
  * Exécute une promesse de fermeture en loggant les erreurs sans interrompre le flux.
@@ -89,11 +67,31 @@ export function registerWorkerListeners<
     worker.on('completed', (job, result) => logger.log(`[worker] job ${job.id} completed`, result));
     worker.on('failed', (job, err) => logger.error(`[worker] job ${job?.id} failed:`, err?.message));
     worker.on('error', (err) => logger.error('[worker] error:', err?.message));
-    events.on('failed', ({ jobId, failedReason }) => logger.error(`[events] job ${jobId} failed: ${failedReason}`));
+    events.on('failed', ({jobId, failedReason}) => logger.error(`[events] job ${jobId} failed: ${failedReason}`));
 }
 
-
-
+/**
+ * Normalise un état BullMQ vers les états métiers de l'UI.
+ *
+ * BullMQ expose des états fins (waiting, delayed, paused, active, completed, failed).
+ * L'UI n'en utilise que 4 principaux : queued, running, completed, failed.
+ *
+ * Mapping :
+ *  - waiting / delayed / paused  → 'queued'
+ *  - active                      → 'running'
+ *  - completed                   → 'completed'
+ *  - failed                      → 'failed'
+ *  - (autre)                     → 'unknown'
+ *
+ * @param bull - État brut renvoyé par BullMQ (ex: 'waiting', 'active', ...)
+ * @returns État normalisé pour l'UI : 'queued' | 'running' | 'completed' | 'failed' | 'unknown'
+ *
+ * @example
+ * mapState('waiting');   // 'queued'
+ * mapState('active');    // 'running'
+ * mapState('completed'); // 'completed'
+ * mapState('oops');      // 'unknown'
+ */
 export function mapState(bull: string): 'queued' | 'running' | 'completed' | 'failed' | 'unknown' {
     switch (bull) {
         case 'waiting':

@@ -18,7 +18,7 @@ export class ServersService {
             const created = await this.prisma.$transaction(
                 listServer.map((server: any) => this.prisma.server.create({data: server})),
             );
-            return{listId: created.map((c) => c.id)}
+            return {listId: created.map((c) => c.id)}
         } catch (err) {
             return Promise.reject(err);
         }
@@ -36,10 +36,6 @@ export class ServersService {
         return `This action returns a #${id} server`;
     }
 
-    update(id: number, updateServerDto: UpdateServerDto) {
-        return `This action updates a #${id} server`;
-    }
-
     async remove(serversToDelete: number[]) {
         return this.prisma.server.deleteMany({
             where: {
@@ -48,20 +44,15 @@ export class ServersService {
         });
     }
 
-    // Option 1: mise à jour unitaire avec garde de statut
+    /**
+     * Marque un serveur comme CONFIGURED s'il est actuellement en PENDING.
+    */
     async markConfigured(id: number) {
         return this.prisma.server.updateMany({
-            where: { id, status: 'PENDING' },
-            data: { status: 'CONFIGURED' },
-        }); // retourne { count }
-    }
-
-    // Option 2: précharger la liste exacte depuis la DB
-    async findPendingByIds(ids: number[]) {
-        return this.prisma.server.findMany({
-            where: { id: { in: ids }, status: 'PENDING' },
-            select: { id: true },
+            where: {id, status: 'PENDING'},
+            data: {status: 'CONFIGURED'},
         });
     }
+
 }
 

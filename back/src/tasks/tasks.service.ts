@@ -50,11 +50,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             throw e;
         }
 
-        // this.worker = new BullWorker<TaskPayload, TaskResult, string>(
-        //     QUEUE_NAME,
-        //     (job) => processLongTask(job),
-        //     {connection: this.redisMain, prefix: BULL_PREFIX, concurrency: 3},
-        // );
         this.worker = new BullWorker<TaskPayload, TaskResult, string>(
             QUEUE_NAME,
             (job) => this.processConfigureServers(job),
@@ -108,7 +103,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     /** Etat du job*/
-
     async getStatus(id: string) {
         if (!id) return {error: 'not_found' as const, id};
 
@@ -133,7 +127,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         };
     }
 
-    //  debug
+    /** Debug*/
     async getCounts() {
         const [
             counts,
@@ -160,42 +154,40 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     private async processConfigureServers(
         job: Job<TaskPayload, TaskResult, string>
     ): Promise<TaskResult> {
+
         const ids = job.data.listIdServer ?? [];
         const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
-
-        // (Optionnel) Précharger les serveurs réellement PENDING pour fiabiliser total
-        // const pending = await this.servers.findPendingByIds(ids);
-        // const targets = pending.map(s => s.id);
-        // const total = Math.max(1, targets.length || 1);
-
         const targets = ids; // si tu préfères rester simple pour l’instant
         const total = Math.max(1, targets.length || 1);
-
         const start = Date.now();
         const failures: Array<{ id: number; reason: string }> = [];
 
         for (let i = 0; i < total; i++) {
             const currentId = targets[i];
-
             try {
-                // “Travail” simulé
                 await new Promise((r) => setTimeout(r, delayMs));
-
-                // Mise à jour DB: PENDING -> CONFIGURED (idempotente via updateMany)
                 const {count} = await this.servers.markConfigured(currentId);
-                if (count === 0) {
-                    // Rien modifié (ex: déjà CONFIGURED ou inexistant)
-                    // On peut logguer, mais on ne jette pas l’erreur
-                }
-            } catch (e: any) {
-                failures.push({id: currentId, reason: e?.message ?? 'unknown'});
-            }
 
-            await job.updateProgress({
-                step: i + 1,
-                total,
-                info: `server ${currentId} (${i + 1}/${total})`,
-            });
+                if (count === 0) throw new Error(`[tasks] server ${currentId} not found or not PENDING`);
+
+                await job.updateProgress({
+                    step: i + 1,
+                    total,
+                    info: `server ${currentId} (${i + 1}/${total})`,
+                });
+
+            } catch (e: any) {
+
+                const reason = e?.message ?? 'unknown';
+                failures.push({ id: currentId, reason });
+                console.error(`[tasks] configure failed for server ${currentId}: ${reason}`);
+
+                await job.updateProgress({
+                    step: i + 1,
+                    total,
+                    info: `server ${currentId} failed: ${reason}`,
+                });
+            }
         }
 
         const elapsedMs = Date.now() - start;
