@@ -47,5 +47,21 @@ export class ServersService {
             },
         });
     }
+
+    // Option 1: mise à jour unitaire avec garde de statut
+    async markConfigured(id: number) {
+        return this.prisma.server.updateMany({
+            where: { id, status: 'PENDING' },
+            data: { status: 'CONFIGURED' },
+        }); // retourne { count }
+    }
+
+    // Option 2: précharger la liste exacte depuis la DB
+    async findPendingByIds(ids: number[]) {
+        return this.prisma.server.findMany({
+            where: { id: { in: ids }, status: 'PENDING' },
+            select: { id: true },
+        });
+    }
 }
 

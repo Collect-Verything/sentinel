@@ -1,9 +1,9 @@
 import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
-import { Queue, QueueEvents, Worker as BullWorker} from 'bullmq';
-import type { JobsOptions } from 'bullmq';
+import type {Job, JobsOptions} from 'bullmq';
+import {Queue, QueueEvents, Worker as BullWorker} from 'bullmq';
 import IORedis from 'ioredis';
-import {mapState, TaskPayload, TaskProgress, TaskResult} from './tasks.tool';
-import {BULL_PREFIX, getRedisConfig, processLongTask, QUEUE_NAME, quitOrDisconnect, registerWorkerListeners, safeClose} from "./tasks.tool";
+import {BULL_PREFIX, getRedisConfig, mapState, QUEUE_NAME, quitOrDisconnect, registerWorkerListeners, safeClose, TaskPayload, TaskProgress, TaskResult} from './tasks.tool';
+import {ServersService} from "../servers/servers.service";
 
 
 @Injectable()
@@ -15,7 +15,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     private worker: BullWorker<TaskPayload, TaskResult, string> | null = null;
 
 
-    constructor() {
+    constructor(private readonly servers: ServersService) {
         const {redisUrl, redisOpts} = getRedisConfig();
 
         this.redisMain = new IORedis(redisUrl, redisOpts);
@@ -50,9 +50,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             throw e;
         }
 
+        // this.worker = new BullWorker<TaskPayload, TaskResult, string>(
+        //     QUEUE_NAME,
+        //     (job) => processLongTask(job),
+        //     {connection: this.redisMain, prefix: BULL_PREFIX, concurrency: 3},
+        // );
         this.worker = new BullWorker<TaskPayload, TaskResult, string>(
             QUEUE_NAME,
-            (job) => processLongTask(job),
+            (job) => this.processConfigureServers(job),
             {connection: this.redisMain, prefix: BULL_PREFIX, concurrency: 3},
         );
 
@@ -80,7 +85,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         ]);
     }
 
-    async enqueue(listIdServer: number[] , idempotencyKey?: string) {
+    async enqueue(listIdServer: number[], idempotencyKey?: string) {
         try {
             await this.queue.waitUntilReady();
         } catch (e) {
@@ -97,6 +102,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         };
 
         const job = await this.queue.add('longTask', { listIdServer, delayMs: 2000 }, opts);
+
         console.log('[enqueue] created job id=', job.id);
         return {id: String(job.id)};
     }
@@ -104,10 +110,10 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     /** Etat du job*/
 
     async getStatus(id: string) {
-        if (!id) return { error: 'not_found' as const, id };
+        if (!id) return {error: 'not_found' as const, id};
 
         let job = await this.queue.getJob(id) ?? (/^\d+$/.test(id) ? await this.queue.getJob(String(Number(id))) : null);
-        if (!job) return { error: 'not_found' as const, id };
+        if (!job) return {error: 'not_found' as const, id};
 
         const bullState = await job.getState();
         const state = mapState(bullState);
@@ -149,6 +155,56 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             completed: completed.map(j => j.id),
             failed: failed.map(j => j.id),
         };
+    }
+
+    private async processConfigureServers(
+        job: Job<TaskPayload, TaskResult, string>
+    ): Promise<TaskResult> {
+        const ids = job.data.listIdServer ?? [];
+        const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
+
+        // (Optionnel) Précharger les serveurs réellement PENDING pour fiabiliser total
+        // const pending = await this.servers.findPendingByIds(ids);
+        // const targets = pending.map(s => s.id);
+        // const total = Math.max(1, targets.length || 1);
+
+        const targets = ids; // si tu préfères rester simple pour l’instant
+        const total = Math.max(1, targets.length || 1);
+
+        const start = Date.now();
+        const failures: Array<{ id: number; reason: string }> = [];
+
+        for (let i = 0; i < total; i++) {
+            const currentId = targets[i];
+
+            try {
+                // “Travail” simulé
+                await new Promise((r) => setTimeout(r, delayMs));
+
+                // Mise à jour DB: PENDING -> CONFIGURED (idempotente via updateMany)
+                const {count} = await this.servers.markConfigured(currentId);
+                if (count === 0) {
+                    // Rien modifié (ex: déjà CONFIGURED ou inexistant)
+                    // On peut logguer, mais on ne jette pas l’erreur
+                }
+            } catch (e: any) {
+                failures.push({id: currentId, reason: e?.message ?? 'unknown'});
+            }
+
+            await job.updateProgress({
+                step: i + 1,
+                total,
+                info: `server ${currentId} (${i + 1}/${total})`,
+            });
+        }
+
+        const elapsedMs = Date.now() - start;
+        const message =
+            failures.length === 0
+                ? `Tâche ${job.id} terminée`
+                : `Tâche ${job.id} terminée avec ${failures.length} échec(s)`;
+
+        return {message, elapsedMs};
     }
 
 }

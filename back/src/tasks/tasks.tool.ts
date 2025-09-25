@@ -22,23 +22,23 @@ export const getRedisConfig = () => {
  * Processor des tâches longues (tick chaque seconde et met à jour la progression).
  * Séparé pour testabilité et lisibilité.
  */
-export async function processLongTask(job: Job<TaskPayload, TaskResult, string>): Promise<TaskResult> {
-    const ids = job.data.listIdServer ?? [];
-    const total = Math.max(1, ids.length || 1);
-    const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
-    const start = Date.now();
-
-    for (let i = 0; i < total; i++) {
-        const currentId = ids[i];
-        await new Promise((r) => setTimeout(r, delayMs));
-        await job.updateProgress({
-            step: i + 1,
-            total,
-            info: currentId != null ? `server ${currentId} (${i + 1}/${total})` : `tick ${i + 1}/${total}`,
-        });
-    }
-    return { message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start };
-}
+// export async function processLongTask(job: Job<TaskPayload, TaskResult, string>): Promise<TaskResult> {
+//     const ids = job.data.listIdServer ?? [];
+//     const total = Math.max(1, ids.length || 1);
+//     const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
+//     const start = Date.now();
+//
+//     for (let i = 0; i < total; i++) {
+//         const currentId = ids[i];
+//         await new Promise((r) => setTimeout(r, delayMs));
+//         await job.updateProgress({
+//             step: i + 1,
+//             total,
+//             info: currentId != null ? `server ${currentId} (${i + 1}/${total})` : `tick ${i + 1}/${total}`,
+//         });
+//     }
+//     return { message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start };
+// }
 
 /**
  * Exécute une promesse de fermeture en loggant les erreurs sans interrompre le flux.
