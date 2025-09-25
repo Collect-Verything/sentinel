@@ -18,6 +18,11 @@ export class ServersController {
         return this.serversService.findAll();
     }
 
+    @Post("list-id")
+    findByListId(@Body('selectedServerIds') selectedServerIds: number[]) {
+        return this.serversService.findByListId(selectedServerIds);
+    }
+
     @Get("by-config/:configurationType")
     findAllByConfig(@Param('configurationType') configurationType: SERVER_STATUS) {
         return this.serversService.findAllByConfig(configurationType);

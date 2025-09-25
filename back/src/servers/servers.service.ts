@@ -1,5 +1,4 @@
 import {Injectable} from '@nestjs/common';
-import {UpdateServerDto} from './dto/update-server.dto';
 import {PrismaService} from "../prisma/prisma.service";
 import {SERVER_STATUS} from "./entities/enums";
 import {CreateServerDto} from "./dto/create-server.dto";
@@ -24,6 +23,10 @@ export class ServersService {
         }
     }
 
+    findByListId(configurationType: number[]) {
+        return this.prisma.server.findMany({where: {id: {in: configurationType}}})
+    }
+
     findAll() {
         return this.prisma.server.findMany();
     }
@@ -46,7 +49,7 @@ export class ServersService {
 
     /**
      * Marque un serveur comme CONFIGURED s'il est actuellement en PENDING.
-    */
+     */
     async markConfigured(id: number) {
         return this.prisma.server.updateMany({
             where: {id, status: 'PENDING'},
