@@ -52,7 +52,9 @@ pop up qui permet de congirurer tous les serveur ajouter de cette serie ajouté,
 
 
 # 23-09-2025
-
-      
 - [ ] Fix - '!back/documentation/**' to ignore docuemnation in action 
-- [ ] Upgrade tasks service, et placer un update sur les serveur persisté, lancé dans la tache, en configured, une fois la tache terminé
+- [x] Upgrade tasks service, et placer un update sur les serveur persisté, lancé dans la tache, en configured, une fois la tache terminé
+
+# 25-09-2025
+- [x] upgrade display action config ansible in front
+- [x] Upgrade clean refacto and study queue and tasks
