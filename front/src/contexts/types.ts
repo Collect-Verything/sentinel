@@ -4,10 +4,11 @@ export type TaskState = "queued" | "running" | "completed" | "failed" | "not_fou
 export interface TaskItem {
     id: string;
     state: TaskState;
+    listIdServer: number[];
     error?: string;
-    seconds?: number;
     createdAt: number;
     updatedAt: number;
+    progress?: number | { step: number; total: number; info?: string };
 }
 
 export type State = {

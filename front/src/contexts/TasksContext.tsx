@@ -43,7 +43,7 @@ function reducer(state: State, action: Action): State {
 
 // --- Context ---
 type Ctx = State & {
-    startTask: (seconds?: number) => Promise<string | undefined>;
+    startTask: (listIdServer?: number[]) => Promise<string | undefined>;
     removeTask: (id: string) => void;
     clearCompleted: () => void;
     getTask: (id: string) => TaskItem | undefined;
@@ -97,9 +97,11 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
 
         try {
             const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/status/${id}`);
-            const data = await res.json() as { state?: TaskState; error?: string };
+            const data = await res.json() as {
+                state?: TaskState; error?: string;
+                progress?: number | { step: number; total: number; info?: string };
+            };
 
-            // merge minimal sans lire state
             dispatch({
                 type: "PATCH",
                 payload: {
@@ -107,6 +109,7 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
                     patch: {
                         state: data.state ?? current.state,
                         error: data.error,
+                        progress: data.progress,       // <-- important
                         updatedAt: Date.now(),
                     },
                 },
@@ -121,41 +124,37 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         }
     }, [TASKS_PATH]);
 
-    async function startTask(seconds: number = 20): Promise<string | undefined> {
-        dispatch({type: "SET_LOADING", payload: true});
-        try {
-            const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/enqueue`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({seconds}),
-            });
-            const {id} = (await res.json()) as { id: string };
+    const startTask = React.useCallback(
+        async (listIdServer: number[] = []): Promise<string | undefined> => {
+            dispatch({ type: "SET_LOADING", payload: true });
+            try {
+                const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/enqueue`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ listIdServer }),
+                });
+                const { id } = (await res.json()) as { id: string };
 
-            // crée/insere tâche locale
-            const now = Date.now();
-            dispatch({
-                type: "UPSERT",
-                payload: {id, state: "queued", seconds, createdAt: now, updatedAt: now},
-            });
+                const now = Date.now();
+                dispatch({
+                    type: "UPSERT",
+                    payload: { id, state: "queued", listIdServer, createdAt: now, updatedAt: now },
+                });
 
-            // (A voire ...) possibilité d'ouvrir panel quand tache start
-            // setPanel(true);
+                const intId = window.setInterval(() => pollStatus(id), 1000);
+                pollers.current.set(id, intId);
+                pollStatus(id);
 
-            // lance poll tout les 1s
-            const intId = window.setInterval(() => pollStatus(id), 1000);
-            pollers.current.set(id, intId);
-
-            // premier poll direct
-            pollStatus(id);
-
-            return id;
-        } catch (e) {
-            dispatch({type: "SET_ERROR", payload: "Task start failed"});
-            return undefined;
-        } finally {
-            dispatch({type: "SET_LOADING", payload: false});
-        }
-    }
+                return id;
+            } catch {
+                dispatch({ type: "SET_ERROR", payload: "Task start failed" });
+                return undefined;
+            } finally {
+                dispatch({ type: "SET_LOADING", payload: false });
+            }
+        },
+        [pollStatus] // + éventuelles autres deps si nécessaires
+    );
 
     function removeTask(id: string) {
         stopPoller(id);

@@ -2,7 +2,7 @@ import type IORedis from 'ioredis';
 import {RedisOptions} from "ioredis";
 import type {Job, QueueEvents, Worker as BullWorker} from 'bullmq';
 
-export type TaskPayload = { seconds: number };
+export type TaskPayload = { listIdServer: number[]; delayMs?: number };
 export type TaskProgress = { step: number; total: number; info?: string };
 export type TaskResult = { message: string; elapsedMs: number };
 
@@ -22,15 +22,22 @@ export const getRedisConfig = () => {
  * Processor des tâches longues (tick chaque seconde et met à jour la progression).
  * Séparé pour testabilité et lisibilité.
  */
-
 export async function processLongTask(job: Job<TaskPayload, TaskResult, string>): Promise<TaskResult> {
-    const total = Math.max(1, Math.floor(job.data.seconds ?? 20));
+    const ids = job.data.listIdServer ?? [];
+    const total = Math.max(1, ids.length || 1);
+    const delayMs = Number.isFinite(job.data.delayMs) ? Math.max(0, job.data.delayMs!) : 1000;
     const start = Date.now();
-    for (let i = 1; i <= total; i++) {
-        await new Promise((r) => setTimeout(r, 1000));
-        await job.updateProgress({step: i, total, info: `tick ${i}/${total}`});
+
+    for (let i = 0; i < total; i++) {
+        const currentId = ids[i];
+        await new Promise((r) => setTimeout(r, delayMs));
+        await job.updateProgress({
+            step: i + 1,
+            total,
+            info: currentId != null ? `server ${currentId} (${i + 1}/${total})` : `tick ${i + 1}/${total}`,
+        });
     }
-    return {message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start};
+    return { message: `Tâche ${job.id} terminée`, elapsedMs: Date.now() - start };
 }
 
 /**
@@ -83,4 +90,23 @@ export function registerWorkerListeners<
     worker.on('failed', (job, err) => logger.error(`[worker] job ${job?.id} failed:`, err?.message));
     worker.on('error', (err) => logger.error('[worker] error:', err?.message));
     events.on('failed', ({ jobId, failedReason }) => logger.error(`[events] job ${jobId} failed: ${failedReason}`));
+}
+
+
+
+export function mapState(bull: string): 'queued' | 'running' | 'completed' | 'failed' | 'unknown' {
+    switch (bull) {
+        case 'waiting':
+        case 'delayed':
+        case 'paused':
+            return 'queued';
+        case 'active':
+            return 'running';
+        case 'completed':
+            return 'completed';
+        case 'failed':
+            return 'failed';
+        default:
+            return 'unknown';
+    }
 }

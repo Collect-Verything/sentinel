@@ -2,7 +2,7 @@ import {Injectable, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import { Queue, QueueEvents, Worker as BullWorker} from 'bullmq';
 import type { JobsOptions } from 'bullmq';
 import IORedis from 'ioredis';
-import type {TaskPayload, TaskProgress, TaskResult} from './tasks.tool';
+import {mapState, TaskPayload, TaskProgress, TaskResult} from './tasks.tool';
 import {BULL_PREFIX, getRedisConfig, processLongTask, QUEUE_NAME, quitOrDisconnect, registerWorkerListeners, safeClose} from "./tasks.tool";
 
 
@@ -50,7 +50,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             throw e;
         }
 
-
         this.worker = new BullWorker<TaskPayload, TaskResult, string>(
             QUEUE_NAME,
             (job) => processLongTask(job),
@@ -61,7 +60,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         if (!worker) throw new Error('Worker not initialized');
         await worker.waitUntilReady();
         registerWorkerListeners<TaskPayload, TaskResult, string>(worker, this.events);
-
     }
 
     /**
@@ -82,7 +80,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         ]);
     }
 
-    async enqueue(seconds = 20, idempotencyKey?: string) {
+    async enqueue(listIdServer: number[] , idempotencyKey?: string) {
         try {
             await this.queue.waitUntilReady();
         } catch (e) {
@@ -98,22 +96,24 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             jobId: idempotencyKey
         };
 
-        const job = await this.queue.add('longTask', {seconds}, opts);
+        const job = await this.queue.add('longTask', { listIdServer, delayMs: 2000 }, opts);
         console.log('[enqueue] created job id=', job.id);
         return {id: String(job.id)};
     }
 
     /** Etat du job*/
+
     async getStatus(id: string) {
-        if (!id) return {error: 'not_found' as const, id};
+        if (!id) return { error: 'not_found' as const, id };
 
         let job = await this.queue.getJob(id) ?? (/^\d+$/.test(id) ? await this.queue.getJob(String(Number(id))) : null);
-        if (!job) return {error: 'not_found' as const, id};
+        if (!job) return { error: 'not_found' as const, id };
 
-        const state = await job.getState();
+        const bullState = await job.getState();
+        const state = mapState(bullState);
         const progress = job.progress as TaskProgress | number;
-        const result = state === 'completed' ? (job.returnvalue as TaskResult) : undefined;
-        const failedReason = state === 'failed' ? job.failedReason : undefined;
+        const result = bullState === 'completed' ? (job.returnvalue as TaskResult) : undefined;
+        const failedReason = bullState === 'failed' ? job.failedReason : undefined;
 
         return {
             id: String(job.id),

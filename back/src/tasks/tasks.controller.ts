@@ -6,8 +6,8 @@ export class TasksController {
     constructor(private readonly tasks: TasksService) {}
 
     @Post('enqueue')
-    async enqueue(@Body() body: { seconds?: number }) {
-        const { id } = await this.tasks.enqueue(body?.seconds ?? 20);
+    async enqueue(@Body() body: { listIdServer: number[] }) {
+        const { id } = await this.tasks.enqueue(body.listIdServer);
         return { id };
     }
 

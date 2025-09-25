@@ -55,7 +55,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
     const handleLunchConfig = () => {
         console.log('typeof startTask =', typeof startTask);
 
-        startTask(20).then((res) => {
+        startTask(idsServerReadyToConfig).then((res) => {
             if (res) {
                 setSwitchTasksPanel(true)
                 setResponseConfig(true)
