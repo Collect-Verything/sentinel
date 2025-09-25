@@ -1,6 +1,5 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post} from '@nestjs/common';
 import {ServersService} from './servers.service';
-import {UpdateServerDto} from './dto/update-server.dto';
 import {SERVER_STATUS} from "./entities/enums";
 import {CreateServerDto} from "./dto/create-server.dto";
 
@@ -27,11 +26,6 @@ export class ServersController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.serversService.findOne(+id);
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateServerDto: UpdateServerDto) {
-        return this.serversService.update(+id, updateServerDto);
     }
 
     @Delete()
