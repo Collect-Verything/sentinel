@@ -9,32 +9,44 @@ import {columnsServer} from "../../common/datagrid/servers.ts";
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
 import Button from "@mui/material/Button";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-
-// La suppression est present de cette maniere pour le moment dans le but de simplifier le developpement et les tests
+import {Grid} from "@mui/material";
+import {DialogConfig} from "./dialog-config.tsx";
 
 export const ServersConfig = () => {
 
     const [rows, setRows] = useState<Server[]>([]);
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({type: 'include', ids: new Set()});
-    const [serversToDelete, setServersToDelete] = useState<GridRowId[]>([]);
+    const [selectedServerIds, setSelectedServerIds] = useState<GridRowId[]>([]);
 
     useEffect(() => {
-        apiGet(`${SERVERS_PATH}/by-config/${SERVER_STATUS.PENDING}`).then(setRows).catch(console.error);
+        apiGet(`${SERVERS_PATH}/by-config/${SERVER_STATUS.PENDING}`)
+            .then(setRows)
+            .catch(console.error);
     }, [])
 
     useEffect(() => {
-        setServersToDelete(Array.from(rowSelectionModel.ids.values()))
+        setSelectedServerIds(Array.from(rowSelectionModel.ids.values()))
     }, [setRowSelectionModel, rowSelectionModel]);
 
     const handleDeleteServers = () => {
-        apiDelete(`${SERVERS_PATH}`, {serversToDelete}).then(() => window.location.reload()).catch(console.error);
+        apiDelete(`${SERVERS_PATH}`, {serversToDelete: selectedServerIds})
+            .then(() => window.location.reload())
+            .then(() => setSelectedServerIds([]))
+            .catch(console.error);
     }
 
     return (
         <>
             {rows ?
                 <Box sx={{height: "80vh", width: '95vw', margin: 'auto', mt: 4}}>
-                    {serversToDelete.length > 0 && <Button variant="contained" sx={{backgroundColor:"white" ,marginBottom:1}} onClick={handleDeleteServers}><DeleteForeverIcon color="error"/></Button>}
+                    {selectedServerIds.length > 0 && (
+                        <Grid spacing={1} container>
+                            <Grid>
+                                <Button variant="outlined" sx={{backgroundColor: "white", marginBottom: 1}} onClick={handleDeleteServers}><DeleteForeverIcon color="error"/></Button>
+                            </Grid>
+                            <DialogConfig selectedServerIds={selectedServerIds} />
+                        </Grid>
+                    )}
                     <DataGrid
                         rows={rows}
                         columns={columnsServer}
@@ -47,11 +59,11 @@ export const ServersConfig = () => {
                         }}
                         pageSizeOptions={[5]}
                         checkboxSelection
-                        disableRowSelectionOnClick
                         showToolbar
                         onRowSelectionModelChange={(newRowSelectionModel) => {
                             setRowSelectionModel(newRowSelectionModel);
                         }}
+                        keepNonExistentRowsSelected
                         rowSelectionModel={rowSelectionModel}
                     />
                 </Box>

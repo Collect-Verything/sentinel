@@ -11,7 +11,7 @@ export interface Configs {
 
 
 export interface Server {
-    id: Number
+    id: number
     serverIp: string
     status: "PENDING" | "CONFIGURING" | "CONFIGURED" | "ERROR"
     isSsl: boolean | string | undefined
