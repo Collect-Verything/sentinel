@@ -17,6 +17,3 @@ export const percentFromProgress = (p?: number | { step: number; total: number }
     return 0;
 };
 
-export function shouldReloadOnTasksClose(pathname: string) {
-    return /^\/(servers-config|servers)(\/|$)/.test(pathname);
-}
