@@ -10,7 +10,7 @@ import TroubleshootIcon from '@mui/icons-material/Troubleshoot';
 import HomeIcon from '@mui/icons-material/Home';
 
 export const ITEMS = [
-    [LINKS.DASHBOARD, HomeIcon, "Dashboard"],
+    [LINKS.HOME, HomeIcon, "Dashboard"],
     [LINKS.MONITORING, TroubleshootIcon, "Monitoring"],
     [LINKS.ADD_SERVERS, AddIcon, "Ajouter"],
     [LINKS.SERVERS_CONFIG, ManageHistoryIcon, "Configurer"],
