@@ -31,9 +31,14 @@ export type TaskAction =
 
 // SERVER
 
+// ---- State & actions
 export type ServerStateType = {
-    servers: ServerInterface[];
+    byStatus: Record<string, ServerInterface[]>;
     loading: boolean;
     error?: string;
-    panel: boolean;
 };
+
+export type ServerAction =
+    | { type: "SET_LOADING"; payload: boolean }
+    | { type: "SET_ERROR"; payload?: string }
+    | { type: "SET_SERVERS"; payload: { status: string; servers: ServerInterface[] } };
