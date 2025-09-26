@@ -1,15 +1,15 @@
 import React, {createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
 import {API_BASE, TASKS_PATH} from "../common/utils/web/const.ts";
-import type {Action, State, TaskItem, TaskState} from "./types.ts";
+import type {TaskAction, TaskStateType, TaskItem, TaskState} from "./types.ts";
 
-const initial: State = {tasks: [], loading: false, panel: false};
+const initial: TaskStateType = {tasks: [], loading: false, panel: false};
 
 // Utils
 const isTerminal = (s?: TaskState, err?: string) =>
     s === "completed" || s === "failed" || err === "not_found";
 
 // --- Reducer ---
-function reducer(state: State, action: Action): State {
+function reducer(state: TaskStateType, action: TaskAction): TaskStateType {
     switch (action.type) {
         case "UPSERT": {
             const exists = state.tasks.find(t => t.id === action.payload.id);
@@ -42,7 +42,7 @@ function reducer(state: State, action: Action): State {
 }
 
 // --- Context ---
-type Ctx = State & {
+type Ctx = TaskStateType & {
     startTask: (idConfig: number, listIdServer?: number[]) => Promise<string | undefined>;
     removeTask: (id: string) => void;
     clearCompleted: () => void;
