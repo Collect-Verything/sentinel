@@ -1,7 +1,7 @@
 import type {GridColDef} from "@mui/x-data-grid";
-import {type Server, ServerStatus} from "../types/backend";
+import {type ServerInterface, ServerStatus} from "../types/backend";
 
-export const columnsServer: GridColDef<Server>[] = [
+export const columnsServer: GridColDef<ServerInterface>[] = [
     {field: 'id', headerName: 'ID', width: 10},
     {field: 'serverIp', headerName: 'IP Server', width: 100},
     {field: 'status', headerName: 'Status', width: 110, valueGetter: (_value) => `${_value === ServerStatus.PENDING ? "🟠 En attente" : "🟢 Configuré"}`},

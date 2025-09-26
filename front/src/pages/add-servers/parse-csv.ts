@@ -1,7 +1,7 @@
 import Papa, {type ParseResult } from "papaparse";
-import type { Server } from "../../common/types/backend";
+import type { ServerInterface } from "../../common/types/backend";
 
-type ServerCreate = Omit<Server, "id" | "createdAt" | "updatedAt">;
+type ServerCreate = Omit<ServerInterface, "id" | "createdAt" | "updatedAt">;
 
 const REQUIRED_HEADERS = [
     "serverIp",

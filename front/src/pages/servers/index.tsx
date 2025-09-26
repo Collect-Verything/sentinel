@@ -3,7 +3,7 @@ import {apiDelete, apiGet} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import Box from '@mui/material/Box';
 import {DataGrid, type GridRowId, type GridRowSelectionModel} from '@mui/x-data-grid';
-import type {Server} from "../../common/types/backend";
+import type {ServerInterface} from "../../common/types/backend";
 import CircularProgress from '@mui/material/CircularProgress';
 import {columnsServer} from "../../common/datagrid/servers.tsx";
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
@@ -12,7 +12,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 export const Servers = () => {
 
-    const [rows, setRows] = useState<Server[]>([]);
+    const [rows, setRows] = useState<ServerInterface[]>([]);
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
     const [serversToDelete, setServersToDelete] = useState<GridRowId[]>([]);
 

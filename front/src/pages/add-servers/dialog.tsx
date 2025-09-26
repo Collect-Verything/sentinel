@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import {type Dispatch, type SetStateAction, useEffect, useState} from "react";
 import {apiGet} from "../../common/utils/web";
 import {CONFIGS_PATH} from "../../common/utils/web/const.ts";
-import type {Configs} from "../../common/types/backend";
+import type {ConfigInterface} from "../../common/types/backend";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import {FormControl, Grid, InputLabel, Select, type SelectChangeEvent} from "@mui/material";
@@ -25,8 +25,8 @@ interface DialogConfigServersProps {
 export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog, idsServerReadyToConfig}: DialogConfigServersProps) => {
 
     const {startTask, setPanel} = useTasks();
-    const [configs, setConfigs] = useState<Configs[]>();
-    const [configSelected, setConfigSelected] = useState<Configs>();
+    const [configs, setConfigs] = useState<ConfigInterface[]>();
+    const [configSelected, setConfigSelected] = useState<ConfigInterface>();
     const [responseConfig, setResponseConfig] = useState(false);
     const [switchTasksPanel, setSwitchTasksPanel] = useState(false);
 

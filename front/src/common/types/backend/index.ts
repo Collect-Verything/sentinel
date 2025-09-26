@@ -1,16 +1,16 @@
-export interface Configs {
+export interface ConfigInterface {
     id: number
     name: string
     editorFullname: string
     playbookPath: string
     variablesJson: string
-    servers?: Server[]
+    servers?: ServerInterface[]
     createdAt: string
     updatedAt: string
 }
 
 
-export interface Server {
+export interface ServerInterface {
     id: number
     serverIp: string
     status: "PENDING" | "CONFIGURING" | "CONFIGURED" | "ERROR"

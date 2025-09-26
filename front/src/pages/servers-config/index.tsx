@@ -3,7 +3,7 @@ import {apiDelete, apiGet} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import Box from '@mui/material/Box';
 import {DataGrid, type GridColDef, type GridRowId, type GridRowSelectionModel} from '@mui/x-data-grid';
-import {type Server} from "../../common/types/backend";
+import {type ServerInterface} from "../../common/types/backend";
 import CircularProgress from '@mui/material/CircularProgress';
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
 import Button from "@mui/material/Button";
@@ -16,7 +16,7 @@ import {columnsServer} from "../../common/datagrid/servers.tsx";
 
 export const ServersConfig = () => {
 
-    const [rows, setRows] = useState<Server[]>([]);
+    const [rows, setRows] = useState<ServerInterface[]>([]);
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({type: 'include', ids: new Set()});
     const [selectedServerIds, setSelectedServerIds] = useState<GridRowId[]>([]);
 
@@ -40,7 +40,7 @@ export const ServersConfig = () => {
 
     const {isServerInProgress} = useTasks();
 
-    const interactiveColumn = useMemo<GridColDef<Server>[]>(() => [
+    const interactiveColumn = useMemo<GridColDef<ServerInterface>[]>(() => [
         {
             field: "id",
             headerName: "ID",

@@ -1,6 +1,6 @@
 import './index.css';
 import {type ChangeEvent, useState} from "react";
-import type {Server} from "../../common/types/backend";
+import type {ServerInterface} from "../../common/types/backend";
 import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
@@ -12,7 +12,7 @@ import {DialogConfigServers} from "./dialog.tsx";
 
 export const AddServers = () => {
 
-    const [serverList, setServerList] = useState<Omit<Server, "id" | "createdAt" | "updatedAt">[]>()
+    const [serverList, setServerList] = useState<Omit<ServerInterface, "id" | "createdAt" | "updatedAt">[]>()
     const [alert, setAlert] = useState<AlertColor | "validconv">("info");
     const [idsServerReadyToConfig, setIdsServerReadyToConfig] = useState<number[]>();
     const [openDialog, setOpenDialog] = useState(false);

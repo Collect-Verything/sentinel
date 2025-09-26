@@ -1,4 +1,6 @@
 // TASK
+import type {ServerInterface} from "../common/types/backend";
+
 export type TaskState = "queued" | "running" | "completed" | "failed" | "not_found" | "unknown";
 
 export interface TaskItem {
@@ -28,3 +30,10 @@ export type TaskAction =
     | { type: "SET_PANEL"; payload: boolean };
 
 // SERVER
+
+export type ServerStateType = {
+    servers: ServerInterface[];
+    loading: boolean;
+    error?: string;
+    panel: boolean;
+};

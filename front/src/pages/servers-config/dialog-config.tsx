@@ -11,7 +11,7 @@ import PermDataSettingIcon from "@mui/icons-material/PermDataSetting";
 import type {GridRowId} from "@mui/x-data-grid";
 import {apiGet, apiPost} from "../../common/utils/web";
 import {CONFIGS_PATH, SERVERS_PATH} from "../../common/utils/web/const.ts";
-import type {Configs, Server} from "../../common/types/backend";
+import type {ConfigInterface, ServerInterface} from "../../common/types/backend";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import ListItem from "@mui/material/ListItem";
@@ -39,12 +39,12 @@ export const DialogConfig = ({selectedServerIds}: DialogConfigProps) => {
     const {startTask, setPanel} = useTasks();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [servers, setServers] = useState<Server[]>([]);
-    const [configs, setConfigs] = useState<Configs[]>([]);
+    const [servers, setServers] = useState<ServerInterface[]>([]);
+    const [configs, setConfigs] = useState<ConfigInterface[]>([]);
     const [configSelected, setConfigSelected] = useState<number | "">("");
     const gridCols = "20px 100px 200px 1fr 90px";
 
-    type ServerId = Server["id"];
+    type ServerId = ServerInterface["id"];
     const [removedIds, setRemovedIds] = useState<Set<ServerId>>(new Set());
 
     const toggleRemoved = (id: ServerId) => {
