@@ -11,7 +11,6 @@ import ErrorIcon from "@mui/icons-material/Error";
 import {useTasks} from "../../contexts/TasksContext.tsx";
 import {Transition} from "./components.tsx";
 import {currentIdFromInfo, formatDateTime, percentFromProgress, serversRange} from "./utils.tsx";
-import {shouldReloadOnTasksClose} from "../../common/utils/document";
 
 export const Tasks = () => {
     const {tasks = [], removeTask, clearCompleted, panel, setPanel} = useTasks();
@@ -19,7 +18,6 @@ export const Tasks = () => {
     const handleOpen = () => setPanel(true);
     const handleClose = () => {
         setPanel(false)
-        shouldReloadOnTasksClose(['/servers-config', '/servers']);
     };
 
     const displayTasks = useMemo(() => {
@@ -67,12 +65,14 @@ export const Tasks = () => {
 
     return (
         <>
-            <Tooltip title={panel ? "Fermer les tâches" : "Ouvrir les tâches"}>
+
+
+        <Tooltip title={panel ? "Fermer les tâches" : "Ouvrir les tâches"}>
                 <Fab
                     size="small"
                     color="default"
                     onClick={panel ? handleClose : handleOpen}
-                    sx={{position: "fixed", bottom: 16, right: 16, zIndex: (t) => t.zIndex.fab}}
+                    sx={{position: "fixed", bottom: 16, right: 40, zIndex: (t) => t.zIndex.fab}}
                 >
                     {panel ? <ExpandMoreIcon/> : <ExpandLessIcon/>}
                 </Fab>
