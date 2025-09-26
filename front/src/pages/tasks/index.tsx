@@ -78,7 +78,7 @@ export const Tasks = () => {
                 </Fab>
             </Tooltip>
 
-            <Dialog fullWidth open={panel} onClose={handleClose} TransitionComponent={Transition}>
+            <Dialog fullWidth open={panel} onClose={handleClose} slots={{transition: Transition,}}>
                 <AppBar sx={{position: "relative"}} className="top-dial">
                     <Toolbar>
                         <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
