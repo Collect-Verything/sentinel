@@ -48,6 +48,9 @@ type Ctx = State & {
     clearCompleted: () => void;
     getTask: (id: string) => TaskItem | undefined;
     setPanel: (open: boolean) => void;
+
+    activeServerIds: Set<number>;
+    isServerInProgress: (serverId: number) => boolean;
 };
 
 const TasksContext = createContext<Ctx | null>(null);
@@ -167,6 +170,21 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         return state.tasks.find(t => t.id === id);
     }
 
+    const activeServerIds = useMemo(() => {
+        const ids = new Set<number>();
+        for (const t of state.tasks) {
+            if (!isTerminal(t.state, t.error)) {
+                (t.listIdServer ?? []).forEach((id) => ids.add(id));
+            }
+        }
+        return ids;
+    }, [state.tasks]);
+
+    const isServerInProgress = useCallback(
+        (serverId: number) => activeServerIds.has(serverId),
+        [activeServerIds]
+    );
+
     const value: Ctx = useMemo(
         () => ({
             ...state,
@@ -175,8 +193,10 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
             clearCompleted,
             getTask,
             setPanel,
+            activeServerIds,
+            isServerInProgress,
         }),
-        [state, startTask, removeTask, clearCompleted, getTask, setPanel]
+        [state, startTask, removeTask, clearCompleted, getTask, setPanel, activeServerIds, isServerInProgress]
     );
 
     return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;

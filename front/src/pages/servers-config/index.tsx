@@ -1,16 +1,18 @@
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {apiDelete, apiGet} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import Box from '@mui/material/Box';
-import {DataGrid, type GridRowId, type GridRowSelectionModel} from '@mui/x-data-grid';
-import type {Server} from "../../common/types/backend";
+import {DataGrid, type GridColDef, type GridRowId, type GridRowSelectionModel} from '@mui/x-data-grid';
+import {type Server} from "../../common/types/backend";
 import CircularProgress from '@mui/material/CircularProgress';
-import {columnsServer} from "../../common/datagrid/servers.ts";
 import {SERVER_STATUS} from "../../common/enums/server-status.ts";
 import Button from "@mui/material/Button";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {Grid} from "@mui/material";
 import {DialogConfig} from "./dialog-config.tsx";
+import {useTasks} from "../../contexts/TasksContext.tsx";
+import {columnsServer} from "../../common/datagrid/servers.tsx";
+
 
 export const ServersConfig = () => {
 
@@ -35,6 +37,31 @@ export const ServersConfig = () => {
             .catch(console.error);
     }
 
+
+    const {isServerInProgress} = useTasks();
+
+    const interactiveColumn = useMemo<GridColDef<Server>[]>(() => [
+        {
+            field: "id",
+            headerName: "ID",
+            width: 90,
+            renderCell: (params) => {
+                const busy = isServerInProgress(params.row.id as number);
+                if (busy) {
+                    return (
+                        <span style={{display: "inline-flex", alignItems: "center", gap: 6}}>
+                            <CircularProgress size={14}/>
+                            {params.value}
+                        </span>
+                    );
+                }
+                return <>{params.value}</>;
+            },
+        },
+        ...columnsServer.filter((c) => c.field !== "id")
+    ], [isServerInProgress]);
+
+
     return (
         <>
             {rows ?
@@ -44,12 +71,12 @@ export const ServersConfig = () => {
                             <Grid>
                                 <Button variant="outlined" sx={{backgroundColor: "white", marginBottom: 1}} onClick={handleDeleteServers}><DeleteForeverIcon color="error"/></Button>
                             </Grid>
-                            <DialogConfig selectedServerIds={selectedServerIds} />
+                            <DialogConfig selectedServerIds={selectedServerIds}/>
                         </Grid>
                     )}
                     <DataGrid
                         rows={rows}
-                        columns={columnsServer}
+                        columns={interactiveColumn}
                         initialState={{
                             pagination: {
                                 paginationModel: {
