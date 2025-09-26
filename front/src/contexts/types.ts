@@ -1,4 +1,4 @@
-
+// TASK
 export type TaskState = "queued" | "running" | "completed" | "failed" | "not_found" | "unknown";
 
 export interface TaskItem {
@@ -11,14 +11,14 @@ export interface TaskItem {
     progress?: number | { step: number; total: number; info?: string };
 }
 
-export type State = {
+export type TaskStateType = {
     tasks: TaskItem[];
     loading: boolean;
     error?: string;
     panel: boolean;
 };
 
-export type Action =
+export type TaskAction =
     | { type: "UPSERT"; payload: TaskItem }
     | { type: "PATCH"; payload: { id: string; patch: Partial<TaskItem> } }
     | { type: "SET_LOADING"; payload: boolean }
@@ -26,3 +26,5 @@ export type Action =
     | { type: "REMOVE"; payload: { id: string } }
     | { type: "CLEAR_COMPLETED" }
     | { type: "SET_PANEL"; payload: boolean };
+
+// SERVER
