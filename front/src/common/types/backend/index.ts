@@ -9,11 +9,17 @@ export interface ConfigInterface {
     updatedAt: string
 }
 
+export enum ServerStatus {
+    PENDING = 'PENDING',
+    CONFIGURED = 'CONFIGURED',
+    ERROR = 'ERROR',
+    CONFIGURING = 'CONFIGURING',
+}
 
 export interface ServerInterface {
     id: number
     serverIp: string
-    status: "PENDING" | "CONFIGURING" | "CONFIGURED" | "ERROR"
+    status: ServerStatus
     isSsl: boolean | string | undefined
     cores: number
     ramMb: number
@@ -33,7 +39,3 @@ export interface ServerInterface {
     updatedAt: String
 }
 
-export const ServerStatus = {
-    PENDING: 'PENDING',
-    CONFIGURED: 'CONFIGURED',
-}
