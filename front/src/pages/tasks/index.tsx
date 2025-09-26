@@ -10,13 +10,18 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import {useTasks} from "../../contexts/TasksContext.tsx";
 import {Transition} from "./components.tsx";
-import {currentIdFromInfo, formatDateTime, percentFromProgress, serversRange} from "./utils.tsx";
+import {currentIdFromInfo, formatDateTime, percentFromProgress, serversRange, shouldReloadOnTasksClose} from "./utils.tsx";
 
 export const Tasks = () => {
     const {tasks = [], removeTask, clearCompleted, panel, setPanel} = useTasks();
 
     const handleOpen = () => setPanel(true);
-    const handleClose = () => setPanel(false);
+    const handleClose = () => {
+        setPanel(false)
+        if (shouldReloadOnTasksClose(window.location.pathname)) {
+            window.location.reload();
+        }
+    };
 
     const displayTasks = useMemo(() => {
         return tasks.map((t: any) => {

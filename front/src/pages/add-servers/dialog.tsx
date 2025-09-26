@@ -26,7 +26,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
 
     const {startTask, setPanel} = useTasks();
     const [configs, setConfigs] = useState<Configs[]>();
-    const [configSelected, setConfigSelected] = useState();
+    const [configSelected, setConfigSelected] = useState<Configs>();
     const [responseConfig, setResponseConfig] = useState(false);
     const [switchTasksPanel, setSwitchTasksPanel] = useState(false);
 
@@ -53,9 +53,7 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
     };
 
     const handleLunchConfig = () => {
-        console.log('typeof startTask =', typeof startTask);
-
-        startTask(idsServerReadyToConfig).then((res) => {
+        startTask(configSelected!.id, idsServerReadyToConfig).then((res) => {
             if (res) {
                 setSwitchTasksPanel(true)
                 setResponseConfig(true)

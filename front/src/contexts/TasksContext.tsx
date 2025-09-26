@@ -43,7 +43,7 @@ function reducer(state: State, action: Action): State {
 
 // --- Context ---
 type Ctx = State & {
-    startTask: (listIdServer?: number[]) => Promise<string | undefined>;
+    startTask: (idConfig: number, listIdServer?: number[]) => Promise<string | undefined>;
     removeTask: (id: string) => void;
     clearCompleted: () => void;
     getTask: (id: string) => TaskItem | undefined;
@@ -56,12 +56,10 @@ const TasksContext = createContext<Ctx | null>(null);
 export function TasksProvider({children}: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(reducer, initial);
 
-    // ---- Panel controls => API unique
     const setPanel = useCallback((open: boolean) => {
         dispatch({type: "SET_PANEL", payload: open});
     }, []);
 
-    // stock setInterval actifs par id
     const pollers = useRef<Map<string, number>>(new Map());
     const stopPoller = (id: string) => {
         const intId = pollers.current.get(id);
@@ -71,13 +69,11 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         }
     };
 
-    // ref vers liste courante pour éviter closures obsoletes
     const tasksRef = useRef<TaskItem[]>([]);
     useEffect(() => {
         tasksRef.current = state.tasks;
     }, [state.tasks]);
 
-    // cleab global si provider démonte
     useEffect(() => {
         return () => {
             pollers.current.forEach((intId) => clearInterval(intId));
@@ -85,7 +81,6 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         };
     }, []);
 
-    // --- Poll status (ciao si deja terminé)
     const pollStatus = useCallback(async (id: string) => {
         const current = tasksRef.current.find(t => t.id === id);
         if (!current) return;
@@ -109,7 +104,7 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
                     patch: {
                         state: data.state ?? current.state,
                         error: data.error,
-                        progress: data.progress,       // <-- important
+                        progress: data.progress,
                         updatedAt: Date.now(),
                     },
                 },
@@ -125,20 +120,20 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
     }, [TASKS_PATH]);
 
     const startTask = React.useCallback(
-        async (listIdServer: number[] = []): Promise<string | undefined> => {
-            dispatch({ type: "SET_LOADING", payload: true });
+        async (idConfig: number, listIdServer: number[] = []): Promise<string | undefined> => {
+            dispatch({type: "SET_LOADING", payload: true});
             try {
                 const res = await fetch(`http://${API_BASE}:3001/${TASKS_PATH}/enqueue`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ listIdServer }),
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({idConfig, listIdServer}),
                 });
-                const { id } = (await res.json()) as { id: string };
+                const {id} = (await res.json()) as { id: string };
 
                 const now = Date.now();
                 dispatch({
                     type: "UPSERT",
-                    payload: { id, state: "queued", listIdServer, createdAt: now, updatedAt: now },
+                    payload: {id, state: "queued", listIdServer, createdAt: now, updatedAt: now},
                 });
 
                 const intId = window.setInterval(() => pollStatus(id), 1000);
@@ -147,13 +142,13 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
 
                 return id;
             } catch {
-                dispatch({ type: "SET_ERROR", payload: "Task start failed" });
+                dispatch({type: "SET_ERROR", payload: "Task start failed"});
                 return undefined;
             } finally {
-                dispatch({ type: "SET_LOADING", payload: false });
+                dispatch({type: "SET_LOADING", payload: false});
             }
         },
-        [pollStatus] // + éventuelles autres deps si nécessaires
+        [pollStatus]
     );
 
     function removeTask(id: string) {
@@ -162,7 +157,6 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
     }
 
     function clearCompleted() {
-        // stopper pollers éventuel par sécu
         state.tasks
             .filter(t => t.state === "completed")
             .forEach(t => stopPoller(t.id));
