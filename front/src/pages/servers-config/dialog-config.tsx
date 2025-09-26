@@ -41,8 +41,8 @@ interface DialogConfigProps {
 export const DialogConfig = ({selectedServerIds}: DialogConfigProps) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [servers, setServers] = useState<Server[] | null>(null);
-    const [configs, setConfigs] = useState<Configs[] | null>(null);
+    const [servers, setServers] = useState<Server[]>([]);
+    const [configs, setConfigs] = useState<Configs[]>([]);
 
     const handleClickOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -55,8 +55,8 @@ export const DialogConfig = ({selectedServerIds}: DialogConfigProps) => {
         if (!open) return;
 
         setLoading(true);
-        setServers(null);
-        setConfigs(null);
+        setServers([]);
+        setConfigs([]);
 
         Promise.all([
             apiPost(`${SERVERS_PATH}/list-id`, {selectedServerIds: selectedServerIds as number[]}),
