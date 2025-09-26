@@ -1,5 +1,6 @@
 export const LINKS = {
-    DASHBOARD: "http://82.165.92.40:3000/",
+    DASHBOARD: "/",
+    MONITORING: "http://82.165.92.40:3000/",
     SERVERS: "/servers",
     SERVERS_CONFIG: "/servers-config",
     ADD_SERVERS: "/add-servers",

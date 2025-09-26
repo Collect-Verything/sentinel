@@ -5,13 +5,14 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import {PositionedMenu} from "../menu";
 import "./index.css"
+
 const BRAND = "Sentinel";
 
 export const MainAppBar = () => {
     return (
         <Box sx={{flexGrow: 1}}
         >
-            <AppBar position="static" sx={{ backgroundColor: "black" }}>
+            <AppBar position="static" sx={{backgroundColor: "black"}}>
                 <Toolbar>
                     <IconButton
                         size="large"
@@ -23,8 +24,8 @@ export const MainAppBar = () => {
                         sx={{
                             mr: 2,
                             px: 1,
-                            color: "#e5e7eb",            // gris très clair (sobre)
-                            fontWeight: 400,              // plus fin
+                            color: "#e5e7eb",
+                            fontWeight: 400,
                             letterSpacing: ".3px",
                             textTransform: "none",
                             position: "relative",
@@ -45,29 +46,28 @@ export const MainAppBar = () => {
                             },
                             "&:hover": {
                                 transform: "translateY(-1px)",
-                                "&::after": { width: "92%" },
+                                "&::after": {width: "92%"},
                             },
                             "&:active": {
                                 transform: "translateY(0) scale(.995)",
-                                "&::after": { width: "78%" },
+                                "&::after": {width: "78%"},
                             },
                         }}
                     >
-          <span className="brand-sentinel" aria-label={BRAND}>
-            {BRAND.split("").map((ch, i) => (
-                <span
-                    key={`${ch}-${i}`}
-                    className="brand-ch"
-                    style={{ ["--i" as any]: i } as React.CSSProperties}
-                >
-                {ch}
-              </span>
-            ))}
-          </span>
+                    <span className="brand-sentinel" aria-label={BRAND}>
+                    {BRAND.split("").map((ch, i) => (
+                        <span
+                            key={`${ch}-${i}`}
+                            className="brand-ch"
+                            style={{["--i" as any]: i} as React.CSSProperties}
+                        >
+                        {ch}
+                      </span>
+                    ))}
+                    </span>
                     </IconButton>
-
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} />
-                    <PositionedMenu />
+                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}/>
+                    <PositionedMenu/>
                 </Toolbar>
             </AppBar>
 

@@ -48,7 +48,8 @@ export const PositionedMenu = () => {
                     ITEMS.map(([href, Icon, label], index) => (
                         <React.Fragment key={href}>
                             {index === 1 && <Divider/>}
-                            {index === 4 && <Divider/>}
+                            {index === 2 && <Divider/>}
+                            {index === 5 && <Divider/>}
                             <MenuItem component="a" onClick={handleClose} href={href}>
                                 <ListItemIcon>
                                     <Icon fontSize="small"/>
