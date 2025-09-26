@@ -34,7 +34,7 @@ export class ServersController {
     }
 
     @Delete()
-    async remove(@Body('serversToDelete') serversToDelete: number[]) {
-        return this.serversService.remove(serversToDelete);
+    async remove(@Body('ids') ids: number[]) {
+        return this.serversService.remove(ids);
     }
 }

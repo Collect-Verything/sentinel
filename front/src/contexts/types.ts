@@ -30,15 +30,17 @@ export type TaskAction =
     | { type: "SET_PANEL"; payload: boolean };
 
 // SERVER
-
-// ---- State & actions
 export type ServerStateType = {
     byStatus: Record<string, ServerInterface[]>;
+    currentStatus: string | null;
     loading: boolean;
+    mutating: boolean;
     error?: string;
 };
 
 export type ServerAction =
     | { type: "SET_LOADING"; payload: boolean }
+    | { type: "SET_MUTATING"; payload: boolean }
     | { type: "SET_ERROR"; payload?: string }
+    | { type: "SET_CURRENT_STATUS"; payload: string | null }
     | { type: "SET_SERVERS"; payload: { status: string; servers: ServerInterface[] } };
