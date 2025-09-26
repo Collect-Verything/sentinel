@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import {PositionedMenu} from "../menu";
 import "./index.css"
+import {LINKS} from "../../app/links.ts";
 
 const BRAND = "Sentinel";
 
@@ -19,7 +20,7 @@ export const MainAppBar = () => {
                         edge="start"
                         aria-label="accueil"
                         component="a"
-                        href="/"
+                        href={LINKS.HOME}
                         disableRipple
                         sx={{
                             mr: 2,

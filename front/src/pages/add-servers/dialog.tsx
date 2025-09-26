@@ -38,12 +38,6 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
             setResponseConfig(false)
             setSwitchTasksPanel(false)
         }
-        // TODO:
-        // if (refreshPage) {
-        // window.location.reload()
-        // Reload n'est pas possible, car le state n'est pas persisdté, donc tous les elements propre a la session, disparaissent pour le mommebt.
-        // Il faut donc persisiter le state en local storage par exemple pour pouvoir refresh la page sans perdre les tache en cours attaché au user, et le reste biensur(auth...)
-        // }
     };
 
 
@@ -68,9 +62,15 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
 
     return (
         <>
+            <Grid container spacing={2}>
+
             <button onClick={handleOpenDialog}>
                 🎛️ Configurer cette range
             </button>
+            <button onClick={()=>document.location.reload()}>
+                🆕 Ajouter
+            </button>
+            </Grid>
             <Dialog
                 open={openDialog}
                 onClose={() => handleClose()}

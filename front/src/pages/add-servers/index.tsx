@@ -7,6 +7,7 @@ import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import {type AlertColor, Grid} from "@mui/material";
 import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alert-message.tsx";
 import {DialogConfigServers} from "./dialog.tsx";
+import {LINKS} from "../../app/links.ts";
 
 // TODO : Creer web util, voire meme creer un package npm pour le partage des type une fois que tout est stable
 
@@ -33,7 +34,6 @@ export const AddServers = () => {
         apiPost(SERVERS_PATH, serverList).then((res) => {
             setAlert("success");
             setIdsServerReadyToConfig(res.listId)
-            // keep id created to configure in model
         }).catch(() => {
             setAlert("error");
         })
@@ -90,9 +90,19 @@ export const AddServers = () => {
             </section>
 
             <footer className="page-footer">
-                <a href="/servers" className="hero-button secondary">
-                    🖥️ Retour à la gestion des serveurs
-                </a>
+                <Grid container spacing={2}>
+                    <Grid>
+                        <a href={LINKS.SERVERS} className="hero-button secondary">
+                            🖥️ Consulter serveurs
+                        </a>
+                    </Grid>
+                    <Grid>
+
+                        <a href={LINKS.SERVERS_CONFIG} className="hero-button secondary">
+                            ⚙️ Configurer serveurs
+                        </a>
+                    </Grid>
+                </Grid>
             </footer>
         </div>
     );

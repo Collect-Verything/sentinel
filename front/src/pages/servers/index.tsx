@@ -6,7 +6,7 @@ import {ErrorTemplate} from "../../common/components/error";
 import {Loader} from "../../common/components/loader";
 import {columnsServer} from "../../common/datagrid/servers.tsx";
 import Box from "@mui/material/Box";
-import {CustomToolbar} from "./custom.tsx";
+import {CustomToolbarConsult} from "./custom-consult.tsx";
 
 export const Servers = () => {
 
@@ -29,7 +29,6 @@ export const Servers = () => {
     if (error) return <ErrorTemplate errorId={error} details={error} onRetry={() => document.location.reload()} showReload/>
 
     return (
-        <>
             <Box sx={{height: "80vh", width: '95vw', margin: 'auto', mt: 4}}>
                 <DataGrid
                     rows={servers}
@@ -41,13 +40,14 @@ export const Servers = () => {
                             },
                         },
                     }}
-                    slots={{toolbar: CustomToolbar}}
+                    slots={{toolbar: CustomToolbarConsult}}
                     slotProps={{
                         toolbar: {
                             serversToDelete,
                             handleDeleteServers,
                         },
-                    }} pageSizeOptions={[5]}
+                    }}
+                    pageSizeOptions={[5]}
                     checkboxSelection
                     disableRowSelectionOnClick
                     showToolbar
@@ -57,6 +57,5 @@ export const Servers = () => {
                     rowSelectionModel={rowSelectionModel}
                 />
             </Box>
-        </>
     )
 }
