@@ -69,7 +69,7 @@ export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: Pro
                         <AddBoxIcon color="primary"/>
                     </Button>
                 </Grid>
-                {serversToDelete.length > 0 && (
+                {serversToDelete!.length > 0 && (
                     <Grid sx={{flex: 1, mx: 0.5}}>
                         <Button variant="outlined" onClick={handleDeleteServers}>
                             <DeleteForeverIcon color="error"/>
