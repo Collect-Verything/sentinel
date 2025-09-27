@@ -2,10 +2,10 @@
 
 ## Étape 1 — Installation et test local
 
-* [ ] Installer Ansible en local (`apt install ansible` / `brew install ansible`).
-* [ ] Créer un playbook minimal de ping (ex. `ansible/playbooks/ping.yml`).
-* [ ] Créer un inventaire local (ex. `ansible/inventory/hosts.ini`) avec un hôte de test.
-* [ ] Exécuter le playbook en CLI pour valider (`ansible-playbook -i ansible/inventory/hosts.ini ansible/playbooks/ping.yml`).
+* [x] Installer Ansible en local (`apt install ansible` / `brew install ansible`).
+* [x] Créer un playbook minimal de ping (ex. `ansible/playbooks/ping.yml`).
+* [x] Créer un inventaire local (ex. `ansible/inventory/hosts.ini`) avec un hôte de test.
+* [x] Exécuter le playbook en CLI pour valider (`ansible-playbook -i ansible/inventory/hosts.ini ansible/playbooks/ping.yml`).
 
 ## Étape 2 — Intégration backend (exécution simple)
 
