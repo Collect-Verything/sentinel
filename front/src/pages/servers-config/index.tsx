@@ -16,21 +16,21 @@ export const ServersConfig = () => {
     const {fetchServers, deleteServers, servers, loading, error} = useServers();
     const {hasActiveTasks} = useTasks();
 
+    const prev = useRef(hasActiveTasks);
     useEffect(() => {
-        fetchServers(SERVER_STATUS.PENDING)
-    }, []);
-
-    const prevHasActive = useRef(hasActiveTasks);
-    useEffect(() => {
-        if (prevHasActive.current && !hasActiveTasks) {
+        if (prev.current() && !hasActiveTasks) {
+            // au moment où toutes les tâches sont terminées
             fetchServers(SERVER_STATUS.PENDING);
         }
-        prevHasActive.current = hasActiveTasks;
+        prev.current = hasActiveTasks;
     }, [hasActiveTasks, fetchServers]);
 
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({type: 'include', ids: new Set()});
     const [selectedServerIds, setSelectedServerIds] = useState<GridRowId[]>([]);
 
+    useEffect(() => {
+        fetchServers(SERVER_STATUS.PENDING)
+    }, []);
 
     useEffect(() => {
         setSelectedServerIds(Array.from(rowSelectionModel.ids.values()))
@@ -75,7 +75,7 @@ export const ServersConfig = () => {
                         },
                     },
                 }}
-                slots={{toolbar: CustomToolbarConfig}}
+                slots={{ toolbar: CustomToolbarConfig}}
                 slotProps={{
                     toolbar: {
                         selectedServerIds,

@@ -9,7 +9,7 @@ import {
     QuickFilterControl,
     QuickFilterTrigger,
     Toolbar,
-    ToolbarButton
+    ToolbarButton, type ToolbarPropsOverrides
 } from '@mui/x-data-grid';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -59,7 +59,8 @@ interface CustomToolbarConfigProps {
     selectedServerIds: GridRowId[]
 }
 
-export function CustomToolbarConfig({handleDeleteServers, selectedServerIds}: CustomToolbarConfigProps) {
+
+export function CustomToolbarConfig({handleDeleteServers, selectedServerIds}: CustomToolbarConfigProps & ToolbarPropsOverrides) {
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
     const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
 

@@ -1,4 +1,16 @@
-import {ColumnsPanelTrigger, ExportCsv, ExportPrint, FilterPanelTrigger, QuickFilter, QuickFilterClear, QuickFilterControl, QuickFilterTrigger, Toolbar, ToolbarButton} from '@mui/x-data-grid';
+import {
+    ColumnsPanelTrigger,
+    ExportCsv,
+    ExportPrint,
+    FilterPanelTrigger,
+    QuickFilter,
+    QuickFilterClear,
+    QuickFilterControl,
+    QuickFilterTrigger,
+    Toolbar,
+    ToolbarButton,
+    type ToolbarPropsOverrides
+} from '@mui/x-data-grid';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -47,7 +59,7 @@ interface CustomToolbarConsultProps {
     handleDeleteServers: () => void
 }
 
-export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: CustomToolbarConsultProps) {
+export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: CustomToolbarConsultProps  & ToolbarPropsOverrides) {
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
     const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
 
