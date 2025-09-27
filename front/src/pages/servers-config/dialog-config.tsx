@@ -101,7 +101,7 @@ export const DialogConfig = ({selectedServerIds}: DialogConfigProps) => {
 
     return (
         <Grid>
-            <Button variant="outlined" onClick={handleClickOpen} sx={{backgroundColor: "white", mb: 1}}>
+            <Button variant="outlined" onClick={handleClickOpen} sx={{backgroundColor: "white"}}>
                 <PermDataSettingIcon color="warning"/>
             </Button>
 

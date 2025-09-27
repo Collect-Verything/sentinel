@@ -40,12 +40,12 @@ const StyledTextField = styled(TextField)<{
     transition: theme.transitions.create(['width', 'opacity']),
 }));
 
-interface CustomToolbarProps {
+interface CustomToolbarConsultProps {
     serversToDelete: ServerInterface[]
     handleDeleteServers: () => void
 }
 
-export function CustomToolbar({serversToDelete, handleDeleteServers,}: CustomToolbarProps) {
+export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: CustomToolbarConsultProps) {
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
     const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
 

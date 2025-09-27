@@ -1,6 +1,6 @@
 import React, {createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef,} from "react";
 import {API_BASE, TASKS_PATH} from "../common/utils/web/const.ts";
-import type {TaskAction, TaskStateType, TaskItem, TaskState} from "./types.ts";
+import type {TaskAction, TaskItem, TaskState, TaskStateType} from "./types.ts";
 
 const initial: TaskStateType = {tasks: [], loading: false, panel: false};
 
@@ -51,6 +51,7 @@ type Ctx = TaskStateType & {
 
     activeServerIds: Set<number>;
     isServerInProgress: (serverId: number) => boolean;
+    hasActiveTasks: boolean;
 };
 
 const TasksContext = createContext<Ctx | null>(null);
@@ -185,6 +186,11 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
         [activeServerIds]
     );
 
+    const hasActiveTasks = useMemo(
+        () => state.tasks.some(t => !isTerminal(t.state, t.error)),
+        [state.tasks]
+    );
+
     const value: Ctx = useMemo(
         () => ({
             ...state,
@@ -195,8 +201,9 @@ export function TasksProvider({children}: { children: React.ReactNode }) {
             setPanel,
             activeServerIds,
             isServerInProgress,
+            hasActiveTasks,
         }),
-        [state, startTask, removeTask, clearCompleted, getTask, setPanel, activeServerIds, isServerInProgress]
+        [state, startTask, removeTask, clearCompleted, getTask, setPanel, activeServerIds, isServerInProgress, hasActiveTasks]
     );
 
     return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
