@@ -3,6 +3,7 @@ import {
     ExportCsv,
     ExportPrint,
     FilterPanelTrigger,
+    type GridToolbarProps,
     QuickFilter,
     QuickFilterClear,
     QuickFilterControl,
@@ -17,7 +18,6 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import {Badge, Button, Divider, Grid, InputAdornment, Menu, MenuItem, styled, TextField, Tooltip} from "@mui/material";
-import type {ServerInterface} from "../../common/types/backend";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {useRef, useState} from "react";
 import {LINKS} from "../../app/links.ts";
@@ -54,12 +54,10 @@ const StyledTextField = styled(TextField)<{
     transition: theme.transitions.create(['width', 'opacity']),
 }));
 
-interface CustomToolbarConsultProps {
-    serversToDelete: ServerInterface[]
-    handleDeleteServers: () => void
-}
+type Props = GridToolbarProps & ToolbarPropsOverrides;
 
-export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: CustomToolbarConsultProps  & ToolbarPropsOverrides) {
+
+export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: Props) {
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
     const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
 

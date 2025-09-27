@@ -18,7 +18,7 @@ export const ServersConfig = () => {
 
     const prev = useRef(hasActiveTasks);
     useEffect(() => {
-        if (prev.current() && !hasActiveTasks) {
+        if (prev.current && !hasActiveTasks) {
             // au moment où toutes les tâches sont terminées
             fetchServers(SERVER_STATUS.PENDING);
         }

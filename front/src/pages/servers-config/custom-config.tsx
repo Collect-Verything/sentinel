@@ -3,13 +3,14 @@ import {
     ExportCsv,
     ExportPrint,
     FilterPanelTrigger,
-    type GridRowId,
+    type GridToolbarProps,
     QuickFilter,
     QuickFilterClear,
     QuickFilterControl,
     QuickFilterTrigger,
     Toolbar,
-    ToolbarButton, type ToolbarPropsOverrides
+    ToolbarButton,
+    type ToolbarPropsOverrides
 } from '@mui/x-data-grid';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -54,13 +55,9 @@ const StyledTextField = styled(TextField)<{
     transition: theme.transitions.create(['width', 'opacity']),
 }));
 
-interface CustomToolbarConfigProps {
-    handleDeleteServers: () => void
-    selectedServerIds: GridRowId[]
-}
+type Props = GridToolbarProps & ToolbarPropsOverrides;
 
-
-export function CustomToolbarConfig({handleDeleteServers, selectedServerIds}: CustomToolbarConfigProps & ToolbarPropsOverrides) {
+export function CustomToolbarConfig({handleDeleteServers, selectedServerIds}: Props) {
     const [exportMenuOpen, setExportMenuOpen] = useState(false);
     const exportMenuTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -72,15 +69,15 @@ export function CustomToolbarConfig({handleDeleteServers, selectedServerIds}: Cu
                         <AddBoxIcon color="primary"/>
                     </Button>
                 </Grid>
-                {selectedServerIds.length > 0 && (
+                {selectedServerIds!.length > 0 && (
                     <Grid>
                         <Button variant="outlined" onClick={handleDeleteServers}>
                             <DeleteForeverIcon color="error"/>
                         </Button>
                     </Grid>
                 )}
-                {selectedServerIds.length > 0 && (
-                    <DialogConfig selectedServerIds={selectedServerIds}/>
+                {selectedServerIds!.length > 0 && (
+                    <DialogConfig selectedServerIds={selectedServerIds!}/>
                 )}
             </Grid>
 
