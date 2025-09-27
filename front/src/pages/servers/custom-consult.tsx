@@ -8,6 +8,8 @@ import {Badge, Button, Divider, Grid, InputAdornment, Menu, MenuItem, styled, Te
 import type {ServerInterface} from "../../common/types/backend";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {useRef, useState} from "react";
+import {LINKS} from "../../app/links.ts";
+import AddBoxIcon from '@mui/icons-material/AddBox';
 
 type OwnerState = {
     expanded: boolean;
@@ -51,13 +53,20 @@ export function CustomToolbarConsult({serversToDelete, handleDeleteServers}: Cus
 
     return (
         <Toolbar>
-            {serversToDelete.length > 0 && (
-                <Grid sx={{flex: 1, mx: 0.5}}>
-                    <Button variant="outlined" onClick={handleDeleteServers}>
-                        <DeleteForeverIcon color="error"/>
+            <Grid container sx={{flex: 1, mx: 0.5}} alignItems="center" spacing={1}>
+                <Grid>
+                    <Button href={LINKS.ADD_SERVERS} variant="outlined">
+                        <AddBoxIcon color="primary"/>
                     </Button>
                 </Grid>
-            )}
+                {serversToDelete.length > 0 && (
+                    <Grid sx={{flex: 1, mx: 0.5}}>
+                        <Button variant="outlined" onClick={handleDeleteServers}>
+                            <DeleteForeverIcon color="error"/>
+                        </Button>
+                    </Grid>
+                )}
+            </Grid>
 
             <Tooltip title="Columns">
                 <ColumnsPanelTrigger render={<ToolbarButton/>}>
