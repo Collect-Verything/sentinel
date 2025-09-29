@@ -1,6 +1,7 @@
 Pour debuger le vault depuis le service:
 
 ```typescript
+    private readonly logger = new Logger(AnsibleRunnerService.name);
 
 /**
  * Debug Vault (safe) — ne loggue jamais les secrets en clair.
