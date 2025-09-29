@@ -1,0 +1,7 @@
+---
+- name: Ping demo hosts
+  hosts: demo
+  gather_facts: false
+  tasks:
+    - name: Test SSH reachability with Ansible ping
+      ansible.builtin.ping:

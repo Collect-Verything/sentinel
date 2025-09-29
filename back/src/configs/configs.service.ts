@@ -2,11 +2,12 @@ import {Injectable} from '@nestjs/common';
 import {CreateConfigDto} from './dto/create-config.dto';
 import {UpdateConfigDto} from './dto/update-config.dto';
 import {PrismaService} from "../prisma/prisma.service";
+import {AnsibleRunnerService} from "./ansible-runner.service";
 
 @Injectable()
 export class ConfigsService {
 
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prisma: PrismaService,private readonly runner: AnsibleRunnerService) {
     }
 
     create(createConfigDto: CreateConfigDto) {
@@ -22,6 +23,11 @@ export class ConfigsService {
         // Trouver un moyen si possible de suivre cette evenement et une fois l'operation terminé renvoyer au front une alert, web socket ? en tous cas pouvoir laisser l'operation en tache de font, et qu'on puisse la suivre dans une petite fenetre de navigation
         // Une fois l'operation terminé et valide, recuperation du mot de passe de la configqui sera le meme pour tousse (plus simple) et update de tous ces serveur pour les passer en configured ainsi que tous les autre elements necessaire
         return {message: "ok"}
+    }
+
+    async runPingDemo() {
+        // Puis exécution
+        return this.runner.runPlaybook('playbooks/ping.yml');
     }
 
     findAll() {

@@ -1,6 +1,14 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache netcat-openbsd openssl
+RUN apk add --no-cache \
+    netcat-openbsd \
+    openssl \
+    ansible \
+    openssh-client \
+    sshpass \
+    python3 \
+ && mkdir -p /root/.ssh && chmod 700 /root/.ssh
+
 WORKDIR /back
 COPY package*.json ./
 RUN npm install
