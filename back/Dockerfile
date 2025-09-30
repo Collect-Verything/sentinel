@@ -14,8 +14,11 @@ FROM node:20-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production
 # OpenSSL & certs for Prisma at runtime (Issue)
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates libssl3 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      openssl ca-certificates libssl3 \
+      ansible openssh-client sshpass python3 \
   && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma

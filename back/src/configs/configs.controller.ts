@@ -18,7 +18,7 @@ export class ConfigsController {
         return this.configsService.configuration(configSelected, listId);
     }
 
-
+    // curl -X POST http://82.165.92.40:3001/configs/ping
     // curl -X POST http://localhost:3001/configs/ping
     @Post('ping')
     @Header('Content-Type', 'text/plain; charset=utf-8')
