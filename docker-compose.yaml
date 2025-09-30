@@ -32,20 +32,18 @@ services:
     restart: always
     environment:
       REDIS_URL: redis://redis-dev:6379/0
-      ANSIBLE_BASE_DIR: /back/ansible
-      ANSIBLE_WORK_DIR: /back/ansible-work
+      ANSIBLE_BASE_DIR: /app/ansible
+      ANSIBLE_WORK_DIR: /app/ansible-work
       ANSIBLE_PLAYBOOK_BIN: /usr/bin/ansible-playbook
       ANSIBLE_VAULT_PASSWORD_FILE: /run/secrets/vault_pass
-      ANSIBLE_CONFIG: /back/ansible/ansible.cfg
+      ANSIBLE_CONFIG: /app/ansible/ansible.cfg
     env_file:
       - ./back/.env
     secrets:
       - vault_pass
     volumes:
-      - ./back:/back
-      - /back/node_modules
-      - ./ansible:/back/ansible:ro
-      - ./ansible-work:/back/ansible-work
+      - ./back:/app
+      - /app/node_modules
     ports:
       - "3001:3001"
     depends_on:

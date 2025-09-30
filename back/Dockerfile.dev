@@ -9,7 +9,7 @@ RUN apk add --no-cache \
     python3 \
  && mkdir -p /root/.ssh && chmod 700 /root/.ssh
 
-WORKDIR /back
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
