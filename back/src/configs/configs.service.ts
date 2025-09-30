@@ -14,8 +14,12 @@ export class ConfigsService {
         return 'This action adds a new config';
     }
 
+    // ICI recuperer l'id de la config
     configuration(configSelected:number ,listId: number[]) {
         console.log('payload', configSelected,listId);
+
+        // if(configSelected === 'id config client'){} ...
+
 
         // recuperer tous les ip serveur de la liste d'id
         // Venir ecrire dans le fichier de config ansible les ip a configurer ainsi que les mot de passe de chaque serveur et identifiant root

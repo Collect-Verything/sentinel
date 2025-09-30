@@ -11,39 +11,6 @@
 * **Backoff custom** (stratégies perso quand le builtin ne suffit pas). ([docs.bullmq.io][9])
 * **Scripts internes & jobs “stalled”** (mécanismes anti boucle active↔wait). ([BullMQ][10])
 
-# ioredis / Redis (connexions, options, shutdown)
-
-* **API ioredis (options & méthodes)** — référence officielle. ([ioredis.readthedocs.io][11])
-* **`maxRetriesPerRequest` & `enableReadyCheck`** (signification + `null` pour attendre indéfiniment). ([redis.github.io][12])
-* **Auto-reconnect & `retryStrategy`** (comportement par défaut, quand utiliser `quit`/`disconnect`). ([ioredis.readthedocs.io][13])
-* **`quit()` vs `disconnect()`** (contexte Node Redis ; utile pour comprendre les nuances de fermeture). ([GitHub][14])
-* **Repo ioredis** (caractéristiques, stabilité). ([GitHub][15])
-
-# NestJS (lifecycle, shutdown, configuration)
-
-* **Lifecycle hooks** (`OnModuleInit`, `OnModuleDestroy`, async init). ([docs.nestjs.com][16])
-* **`enableShutdownHooks()`** (pour déclencher proprement les hooks à la fin). ([docs.nestjs.com][16])
-* **Graceful shutdown (exemples & bonnes pratiques)**. ([DEV Community][17])
-* **Configuration & `ConfigModule`** (schema validation via Joi, ou `validate()` custom). ([docs.nestjs.com][18])
-* **Queues dans Nest (intégration Bull/BullMQ, listeners d’événements)**. ([docs.nestjs.com][19])
-* **Terminus / Healthchecks** (reco d’activer shutdown hooks). ([docs.nestjs.com][20])
-
-# (Bonus) Articles de référence utiles
-
-* **Rate-limit recipes avec BullMQ** (bonnes pratiques). ([Taskforce.sh Blog][21])
-* **Validation de config par module (Joi / custom)**. ([Darraghoriordan.com][22])
-
----
-
-## Petits rappels mappés à ton code
-
-* **Readiness en parallèle** (`waitUntilReady()` sur `Queue`/`QueueEvents`/`Worker`) : voir lifecycle BullMQ + Workers. ([docs.bullmq.io][4])
-* **`removeOnComplete`/`removeOnFail`** (nettoyage limité par `age`/`count`) : doc auto-removal. ([docs.bullmq.io][2])
-* **`attempts` + `backoff` exponentiel** (résilience `enqueue`) : retries/backoff. ([docs.bullmq.io][7])
-* **Progression objet** (`TaskProgress | number`) + `getState()` + timestamps (`processedOn`, `finishedOn`) : Job API/Workers. ([BullMQ][6])
-* **Fermeture Redis** : tenter `quit()` puis fallback `disconnect()` si l’instance est déjà HS. ([ioredis.readthedocs.io][13])
-* **Hooks Nest + `enableShutdownHooks()`** pour garantir l’appel de `onModuleDestroy()` en prod. ([docs.nestjs.com][16])
-
 
 [1]: https://docs.bullmq.io/guide/queues?utm_source=chatgpt.com "Queues"
 [2]: https://docs.bullmq.io/guide/queues/auto-removal-of-jobs?utm_source=chatgpt.com "Auto-removal of jobs"

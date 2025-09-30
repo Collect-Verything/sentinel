@@ -9,27 +9,27 @@
 
 ## Étape 2 — Intégration backend (exécution simple)
 
-* [ ] Créer le sous-répertoire backend `ansible/` (ex. `ansible/playbooks`, `ansible/inventory`, `ansible/roles`).
-* [ ] Implémenter dans le service NestJS une méthode d’exécution shell (`child_process.exec` / `spawn`) pour lancer `ansible-playbook`.
-* [ ] Paramétrer le chemin de travail (cwd) vers le dossier `ansible/`.
-* [ ] Exécuter le playbook de ping via le service backend et journaliser la sortie/erreurs.
-* [ ] Ajouter gestion d’erreurs, timeout, et code retour du process.
-* [ ] Améliorer le modèle de données Prisma selon les besoins réels (configs/playbooks, inventaires, rôles/tags, exécutions, logs).
+* [x] Créer le sous-répertoire backend `ansible/` (ex. `ansible/playbooks`, `ansible/inventory`, `ansible/roles`).
+* [x] Implémenter dans le service NestJS une méthode d’exécution shell (`child_process.exec` / `spawn`) pour lancer `ansible-playbook`.
+* [x] Paramétrer le chemin de travail (cwd) vers le dossier `ansible/`.
+* [x] Exécuter le playbook de ping via le service backend et journaliser la sortie/erreurs.
+* [x] Ajouter gestion d’erreurs, timeout, et code retour du process.
+* [x] Améliorer le modèle de données Prisma selon les besoins réels (configs/playbooks, inventaires, rôles/tags, exécutions, logs).
 * [ ] Creer la methode qui va overide les fichier ansible avec le snouveau ip a configurer
  
 ## Étape 3 — Sélection dynamique playbook/serveurs
 
-* [ ] Implémenter la sélection de la **config** (playbook) et des **serveurs** à partir des paramètres envoyés par le front.
-* [ ] Récupérer via Prisma les IP/identifiants/mots de passe associés aux serveurs sélectionnés.
-* [ ] Préparer deux configs **seedées** (config A / config B) avec actions distinguables (ex. package présent/absent) et versionner ces fichiers.
-* [ ] Mettre à jour le seed et le mapping BDD ⇄ chemin fichiers (chemins persistés en base).
+* [x] Implémenter la sélection de la **config** (playbook) et des **serveurs** à partir des paramètres envoyés par le front.
+* [x] Récupérer via Prisma les IP/identifiants/mots de passe associés aux serveurs sélectionnés.
+* [x] Préparer deux configs **seedées** (config A / config B) avec actions distinguables (ex. package présent/absent) et versionner ces fichiers.
+* [x] Mettre à jour le seed et le mapping BDD ⇄ chemin fichiers (chemins persistés en base).
 * [ ] Générer/adapter l’inventaire (ou un inventaire temporaire) avant exécution du playbook.
-* [ ] Exécuter Ansible avec les arguments dynamiques (`-i` inventaire généré, playbook choisi, `--extra-vars` si nécessaire).
+* [x] Exécuter Ansible avec les arguments dynamiques (`-i` inventaire généré, playbook choisi, `--extra-vars` si nécessaire).
 
 ## Étape 4 — Persistance, versionnement et pipeline
 
-* [ ] Versionner les playbooks dans le repo backend (source of truth).
-* [ ] Vérifier que build/packaging **n’exclut pas** les fichiers Ansible (vérifier `.dockerignore`, bundlers, etc.).
+* [x] Versionner les playbooks dans le repo backend (source of truth).
+* [x] Vérifier que build/packaging **n’exclut pas** les fichiers Ansible (vérifier `.dockerignore`, bundlers, etc.).
 * [ ] Intégrer la méthode du **service Ansible** au **service Tasks** dans la méthode `enqueueWorker`.
 * [ ] Acheter un serveur de test “à 1€” et l’ajouter à la source d’inventaire (CSV/BDD) avec user/password/IP.
 * [ ] Lancer une exécution end-to-end sur ce serveur et vérifier le résultat (logs + état serveur).

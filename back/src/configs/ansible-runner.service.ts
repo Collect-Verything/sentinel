@@ -12,23 +12,27 @@ export class AnsibleRunnerService {
     private readonly workDir = DEFAULT_WORK;
     private readonly timeoutMs = 60_000;
 
-
     runPlaybook(relPlaybookPath: string, extraArgs: string[] = []) {
         return new Promise<{ code: number; stdout: string; stderr: string }>((resolve, reject) => {
+
             try {
                 fs.mkdirSync(this.workDir, {recursive: true});
             } catch {
             }
+
             const args = [relPlaybookPath, ...extraArgs];
             const child = spawn(DEFAULT_BIN, args, {cwd: this.ansibleDir, env: {...process.env}});
             let stdout = '';
             let stderr = '';
+
             const timer = setTimeout(() => {
                 child.kill('SIGKILL');
                 reject(new Error(`Timeout after ${this.timeoutMs}ms`));
             }, this.timeoutMs);
+
             child.stdout.on('data', d => (stdout += d.toString()));
             child.stderr.on('data', d => (stderr += d.toString()));
+
             child.on('error', err => {
                 clearTimeout(timer);
                 reject(err);
