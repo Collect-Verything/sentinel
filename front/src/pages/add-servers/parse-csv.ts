@@ -1,5 +1,5 @@
-import Papa, {type ParseResult } from "papaparse";
-import type { ServerInterface } from "../../common/types/backend";
+import Papa, {type ParseResult} from "papaparse";
+import type {ServerInterface} from "../../common/types/backend";
 
 type ServerCreate = Omit<ServerInterface, "id" | "createdAt" | "updatedAt">;
 
@@ -19,7 +19,7 @@ export function parseServerCsvToJson(file: File): Promise<ServerCreate[]> {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            transformHeader: (h) => h.trim(),      // nettoie les entêtes
+            transformHeader: (h) => h.trim(),
             dynamicTyping: false,
             complete: (results: ParseResult<any>) => {
 
@@ -73,7 +73,7 @@ export function parseServerCsvToJson(file: File): Promise<ServerCreate[]> {
                                 ? null
                                 : row.sshPassword,
                         health: (row.health as ServerCreate["health"]) ?? "UNKNOWN",
-                        lastSeenAt: row.lastSeenAt ?  row.lastSeenAt : null,
+                        lastSeenAt: row.lastSeenAt ? row.lastSeenAt : null,
                         lastCheckAt: row.lastCheckAt ? row.lastCheckAt : null,
                     };
                     return item;

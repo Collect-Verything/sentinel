@@ -5,16 +5,15 @@ import {parseServerCsvToJson} from "./parse-csv.ts";
 import {apiPost} from "../../common/utils/web";
 import {SERVERS_PATH} from "../../common/utils/web/const.ts";
 import {type AlertColor, Grid} from "@mui/material";
-import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alert-message.tsx";
 import {DialogConfigServers} from "./dialog.tsx";
 import {LINKS} from "../../app/links.ts";
-
-// TODO : Creer web util, voire meme creer un package npm pour le partage des type une fois que tout est stable
+import {DialogConventionCsv} from "./convention";
+import {ErrorServerPersistenceIcon, ErrorServerPersistenceMessage} from "./alerts.tsx";
 
 export const AddServers = () => {
 
     const [serverList, setServerList] = useState<Omit<ServerInterface, "id" | "createdAt" | "updatedAt">[]>()
-    const [alert, setAlert] = useState<AlertColor | "validconv">("info");
+    const [alert, setAlert] = useState<AlertColor | "valid_conv">("info");
     const [idsServerReadyToConfig, setIdsServerReadyToConfig] = useState<number[]>();
     const [openDialog, setOpenDialog] = useState(false);
 
@@ -23,10 +22,8 @@ export const AddServers = () => {
         const file = event.target.files?.[0];
         if (file) parseServerCsvToJson(file).then((res) => {
             setServerList(res)
-            setAlert("validconv")
-        }).catch(() => {
-            setAlert("warning")
-        });
+            setAlert("valid_conv")
+        }).catch(() => setAlert("warning"));
     };
 
 
@@ -34,14 +31,10 @@ export const AddServers = () => {
         apiPost(SERVERS_PATH, serverList).then((res) => {
             setAlert("success");
             setIdsServerReadyToConfig(res.listId)
-        }).catch(() => {
-            setAlert("error");
-        })
+        }).catch(() => setAlert("error"))
     }
 
-    const handleOpenDialog = () => {
-        setOpenDialog(true);
-    };
+    const handleOpenDialog = () => setOpenDialog(true);
 
 
     return (
@@ -54,9 +47,16 @@ export const AddServers = () => {
             </header>
 
             <section className="form-section">
-                <label htmlFor="csv-upload" className="form-label">
-                    Importer un fichier CSV
-                </label>
+                <Grid container spacing={1} alignItems="center">
+                    <Grid>
+                        <label htmlFor="csv-upload" className="form-label">
+                            Importer un fichier CSV
+                        </label>
+                    </Grid>
+                    <Grid>
+                        <DialogConventionCsv/>
+                    </Grid>
+                </Grid>
                 <input
                     type="file"
                     id="csv-upload"
@@ -81,11 +81,11 @@ export const AddServers = () => {
                     </Grid>
                 </Grid>
                 <button
-                    className={`hero-button ${alert === "validconv" ? "success" : ""}`}
-                    disabled={alert !== "validconv"}
+                    className={`hero-button ${alert === "valid_conv" ? "success" : ""}`}
+                    disabled={alert !== "valid_conv"}
                     onClick={sendFile}
                 >
-                    📤 Envoyer
+                    💾 Persister
                 </button>
             </section>
 

@@ -1,0 +1,2 @@
+export const csvConvention = `serverIp,status,isSsl,cores,ramMb,storageGb,provider,ownerClientId,batchId,ansibleConfigId,sshUser,sshPort,sshAuth,sshPassword,health
+336.376.121.131,PENDING,false,2,2048,40,ovh,0,,,"root",212,PASSWORD,password,UNKNOWN`;

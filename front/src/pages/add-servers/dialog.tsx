@@ -64,12 +64,12 @@ export const DialogConfigServers = ({openDialog, setOpenDialog, handleOpenDialog
         <>
             <Grid container spacing={2}>
 
-            <button onClick={handleOpenDialog}>
-                🎛️ Configurer cette range
-            </button>
-            <button onClick={()=>document.location.reload()}>
-                🆕 Ajouter
-            </button>
+                <button onClick={handleOpenDialog}>
+                    🎛️ Configurer maintenant
+                </button>
+                <button onClick={() => document.location.reload()}>
+                    🧩 Ajouter d’autres serveurs
+                </button>
             </Grid>
             <Dialog
                 open={openDialog}
