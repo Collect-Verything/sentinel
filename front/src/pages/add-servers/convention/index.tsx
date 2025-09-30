@@ -17,7 +17,7 @@ export const DialogConventionCsv = () => {
     return (
         <Grid>
             <Button>
-                <InfoOutlinedIcon color="warning" onClick={()=>() => setOpen(true)}/>
+                <InfoOutlinedIcon color="warning" onClick={()=>setOpen(true)}/>
             </Button>
             <Dialog
                 open={open}
