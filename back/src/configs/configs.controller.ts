@@ -19,7 +19,7 @@ export class ConfigsController {
     }
 
 
-    // curl -X POST http://localhost:3001/configs/pin
+    // curl -X POST http://localhost:3001/configs/ping
     @Post('ping')
     @Header('Content-Type', 'text/plain; charset=utf-8')
     async ping(): Promise<string> {

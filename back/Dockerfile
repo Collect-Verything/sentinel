@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/ansible ./ansible
+
 COPY package*.json ./
 EXPOSE 3001
 CMD sh -lc '\
