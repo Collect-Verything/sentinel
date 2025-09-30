@@ -73,7 +73,18 @@ async function main() {
         }
     })
 
-    console.log({server1, server2, server3, config1,config2});
+    const config3Ping = await prisma.ansibleConfig.upsert({
+        where: {name: "Ping Demo"},
+        update: {},
+        create: {
+            name: "Ping Demo",
+            editorFullname: "Admin_Canse",
+            playbookPath: "playbooks/ping.yml",
+            variablesJson: "",
+        }
+    })
+
+    console.log({server1, server2, server3, config1,config2,config3Ping});
 }
 
 main()
