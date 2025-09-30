@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Header, Param, Patch, Post} from '@nestjs/common';
 import {ConfigsService} from './configs.service';
 import {CreateConfigDto} from './dto/create-config.dto';
 import {UpdateConfigDto} from './dto/update-config.dto';
@@ -16,6 +16,16 @@ export class ConfigsController {
     @Post('lunch')
     configuration(@Body() configSelected: number, listId: number[]) {
         return this.configsService.configuration(configSelected, listId);
+    }
+
+
+    // curl -X POST http://localhost:3001/configs/pin
+    @Post('ping')
+    @Header('Content-Type', 'text/plain; charset=utf-8')
+    async ping(): Promise<string> {
+        const r = await this.configsService.runPingDemo();
+        const out = r.stdout || r.stderr || '';
+        return out;
     }
 
     @Get()

@@ -35,7 +35,7 @@
   WORKDIR /app
   COPY package*.json ./
   RUN npm ci
-  COPY . .
+  COPY .. .
   RUN npx prisma generate && npm run build
 
   # --- runtime ---

@@ -48,6 +48,8 @@ Stack : **NestJS**, **BullMQ**, **Redis**, **Prisma** (DB), **Docker/Compose**.
 * **Config** : variables d’environnement (ex. `REDIS_URL`, DB…).
 * **Observabilité** (optionnel) : endpoints `GET /health`, `GET /ready`.
 
+
+Mettre a jour ansible ...
 ```
 back/
 ├─ .env                     # Variables d'env locales
@@ -114,6 +116,8 @@ DATABASE_URL="mysql://user:password@mysql-sentinel:3306/sentinel_db"
 # File de tâches (BullMQ)
 REDIS_URL=redis://redis-dev:6379
 ```
+
+⚠️ Vault Ansible ⚠️ : Checker documentation/study/vault/encrypt.md
 
 ### Notes utiles
 

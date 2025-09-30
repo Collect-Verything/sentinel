@@ -11,7 +11,7 @@ export const Home = () => {
                     Gérez vos serveurs, consultez vos métriques et gardez un œil sur vos logs en toute simplicité.
                 </p>
                 <div className="hero-actions">
-                    <a href={LINKS.HOME} className="hero-button primary">
+                    <a href={LINKS.MONITORING} className="hero-button primary">
                         📊 Dashboard Grafana
                     </a>
                     <a href={LINKS.ADD_SERVERS} className="hero-button success">
